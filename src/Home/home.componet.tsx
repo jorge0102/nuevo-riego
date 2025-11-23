@@ -84,10 +84,6 @@ const Home: React.FC = () => {
     }
   };
 
-  const handleScheduleClick = () => {
-    console.log('Programa clickeado');
-  };
-
   const handleHistoryClick = () => {
     console.log('Historial clickeado');
   };
@@ -117,7 +113,6 @@ const Home: React.FC = () => {
           <div className="flex-shrink-0" style={{ height: '80px' }}>
             <ActionsBar
               onManualClick={handleManualClick}
-              onScheduleClick={handleScheduleClick}
               onHistoryClick={handleHistoryClick}
             />
           </div>

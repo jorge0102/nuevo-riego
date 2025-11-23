@@ -4,10 +4,11 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Controlador de Riego Inteligente</title>
+    <title>Smart Irrigation Controller</title>
     
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     
     <script>
@@ -16,17 +17,28 @@
         theme: {
           extend: {
             colors: {
-              "primary": "#137fec",
-              "background-light": "#f6f7f8",
-              "background-dark": "#101922",
+              "primary": "#BDE0FE",
+              "primary-dark": "#3E4C59",
+              "secondary": "#7DCEA0",
+              "background-light": "#F8F7F2",
+              "background-dark": "#1a2a3a",
+              "text-light": "#34495E",
+              "text-dark": "#EAEAEA",
+              "surface-light": "#FFFFFF",
+              "surface-dark": "#2c3e50",
+              "inactive-light": "#D5D8DC",
+              "inactive-dark": "#4a6078",
+              "card-light": "#FFFFFF",
+              "card-dark": "#1A1A2E",
+              "success": "#77DD77"
             },
             fontFamily: {
-              "display": ["Plus Jakarta Sans", "sans-serif"]
+              "display": ["Plus Jakarta Sans", "Spline Sans", "sans-serif"]
             },
             borderRadius: {
-              "DEFAULT": "0.25rem",
-              "lg": "0.5rem",
-              "xl": "0.75rem",
+              "DEFAULT": "1rem",
+              "lg": "1.25rem",
+              "xl": "1.5rem",
               "full": "9999px"
             },
           },
