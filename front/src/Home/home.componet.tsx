@@ -1,40 +1,16 @@
 
 import React, { useEffect } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
-import { isDarkModeAtom, tankStatusAtom, weeklyScheduleAtom } from './home.module';
+import { isDarkModeAtom, tankStatusAtom } from './home.module';
 import { ActionsBar } from './components/actions-bar.component';
 import { Header } from './components/header.componet';
 import { MainStatusCard } from './components/main-status-card.component';
 import { TankLevelCard } from './components/tank-level-card.component';
-import { WeeklySchedule } from './components/weekly-schedule.component';
 import { homeService } from './home.state';
 
 const Home: React.FC = () => {
   const [tankStatus, setTankStatus] = useAtom(tankStatusAtom);
-  const [weeklySchedule, setWeeklySchedule] = useAtom(weeklyScheduleAtom);
   const isDarkMode = useAtomValue(isDarkModeAtom);
-
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const tankLevel = await homeService.getTankLevel();
-        const wateringStatus = await homeService.getWateringStatus();
-        const schedule = await homeService.getWeeklySchedule();
-
-        setTankStatus({
-          tankLevel,
-          isWatering: wateringStatus.isWatering,
-          timeRemaining: wateringStatus.timeRemaining,
-        });
-
-        setWeeklySchedule(schedule);
-      } catch (error) {
-        console.error('Error cargando datos:', error);
-      }
-    };
-
-    loadData();
-  }, [setTankStatus, setWeeklySchedule]);
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -95,7 +71,7 @@ const Home: React.FC = () => {
     >
       <div className="h-full flex flex-col font-display bg-background-light dark:bg-background-dark text-[#101922] dark:text-gray-200 overflow-hidden">
         <div className="flex-shrink-0" style={{ height: '60px' }}>
-          <Header title="Jardín Frontal" onSettingsClick={handleSettingsClick} />
+          <Header title="Finca Eloy" onSettingsClick={handleSettingsClick} />
         </div>
 
         <main 
@@ -119,11 +95,7 @@ const Home: React.FC = () => {
 
           <div className="flex-shrink-0" style={{ height: '100px' }}>
             <TankLevelCard level={tankStatus.tankLevel} label="Nivel del Estanque" />
-          </div>
-
-          <div className="flex-1 overflow-hidden" style={{ minHeight: '120px' }}>
-            <WeeklySchedule schedule={weeklySchedule} />
-          </div>
+          </div>       
         </main>
       </div>
     </div>

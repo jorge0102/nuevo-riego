@@ -14,7 +14,7 @@ const Schedule: React.FC = () => {
       try {
         const level = await scheduleService.getTankLevel();
         const sectorsData = await scheduleService.getSectors();
-        
+
         setTankLevel(level);
         setSectors(sectorsData);
       } catch (error) {
@@ -32,7 +32,7 @@ const Schedule: React.FC = () => {
   const handleToggleSector = async (id: number, isActive: boolean) => {
     try {
       await scheduleService.toggleSector(id, isActive);
-      
+
       setSectors(prevSectors =>
         prevSectors.map(sector =>
           sector.id === id ? { ...sector, isActive } : sector
@@ -46,7 +46,7 @@ const Schedule: React.FC = () => {
   const handleModeChange = async (id: number, isAuto: boolean) => {
     try {
       await scheduleService.toggleMode(id, isAuto);
-      
+
       setSectors(prevSectors =>
         prevSectors.map(sector =>
           sector.id === id ? { ...sector, isAuto } : sector
@@ -57,17 +57,12 @@ const Schedule: React.FC = () => {
     }
   };
 
-  const handleEditSchedules = () => {
-    console.log('Edit Schedules clickeado');
-    // Aquí podrías abrir un modal o navegar a otra página
-  };
-
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
-      <ScheduleHeader title="Smart Irrigation" onSettingsClick={handleSettingsClick} />
-      
+      <ScheduleHeader title="Volver Menú" onSettingsClick={handleSettingsClick} />
+
       <main className="flex-grow p-4 pt-2">
-        
+
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {sectors.map(sector => (
             <SectorCard
@@ -79,17 +74,6 @@ const Schedule: React.FC = () => {
           ))}
         </div>
       </main>
-      
-      {/* Floating Action Button */}
-      <div className="sticky bottom-0 w-full p-4 flex justify-center">
-        <button 
-          onClick={handleEditSchedules}
-          className="flex items-center justify-center gap-3 h-14 w-full max-w-sm rounded-full bg-primary text-white font-bold text-lg shadow-lg hover:bg-primary/90 transition-colors"
-        >
-          <span className="material-symbols-outlined">edit_calendar</span>
-          Edit Schedules
-        </button>
-      </div>
     </div>
   );
 };

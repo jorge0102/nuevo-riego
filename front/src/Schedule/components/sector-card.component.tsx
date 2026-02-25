@@ -52,7 +52,7 @@ export const SectorCard: React.FC<SectorCardProps> = ({ sector, onToggle }) => {
                 {sector.isActive ? 'play_circle' : 'pause_circle'}
               </span>
               <p className={`text-sm font-medium leading-normal ${sector.isActive ? 'text-white' : ''}`}>
-                {sector.isActive ? 'Active' : 'Inactive'}
+                {sector.isActive ? 'Activado' : 'Inactivo'}
               </p>
             </div>
             

@@ -30,7 +30,7 @@ export const mockDays: DayConfig[] = [
 export const mockSectorConfigs: Record<number, SectorConfiguration> = {
   1: {
     id: 1,
-    name: 'Sector 1: Front Lawn',
+    name: 'Sector 1: Aguacates',
     icon: 'yard',
     isAuto: true,
     startTime: '06:30',
@@ -40,7 +40,7 @@ export const mockSectorConfigs: Record<number, SectorConfiguration> = {
   },
   2: {
     id: 2,
-    name: 'Sector 2: Flower Beds',
+    name: 'Sector 2: Mangos',
     icon: 'local_florist',
     isAuto: true,
     startTime: '07:00',
@@ -50,7 +50,7 @@ export const mockSectorConfigs: Record<number, SectorConfiguration> = {
   },
   3: {
     id: 3,
-    name: 'Sector 3: Veggie Patch',
+    name: 'Sector 3: Pencas',
     icon: 'potted_plant',
     isAuto: true,
     startTime: '06:00',
@@ -60,7 +60,7 @@ export const mockSectorConfigs: Record<number, SectorConfiguration> = {
   },
   4: {
     id: 4,
-    name: 'Sector 4: Backyard',
+    name: 'Sector 4: Pitayas',
     icon: 'grass',
     isAuto: false,
     startTime: '18:00',

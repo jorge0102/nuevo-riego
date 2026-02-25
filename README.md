@@ -1,73 +1,197 @@
-# React + TypeScript + Vite
+# 🌱 Sistema de Riego Automatizado
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema completo de riego automatizado con frontend en React y backend en Python + MySQL.
 
-Currently, two official plugins are available:
+## 📁 Estructura del Proyecto
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+riego/
+├── front/              # Frontend React + TypeScript + Vite
+├── Api/                # Backend FastAPI + Python
+├── database/           # Scripts SQL de base de datos
+└── README.md          # Este archivo
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🚀 Instalación Rápida
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 1. Base de Datos MySQL
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# Crear la base de datos
+mysql -u root -p < database/schema.sql
 ```
+
+### 2. Backend (API Python)
+
+```bash
+cd Api
+
+# Crear entorno virtual
+python3 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus credenciales de MySQL
+
+# Ejecutar la API
+python main.py
+```
+
+La API estará en: http://localhost:3000
+
+### 3. Frontend (React)
+
+```bash
+cd front
+
+# Instalar dependencias
+npm install
+
+# Ejecutar en modo desarrollo
+npm run dev
+```
+
+El frontend estará en: http://localhost:5173
+
+## 📋 Características
+
+### Frontend
+- ✅ Dashboard principal con estado del tanque
+- ✅ Control de sectores de riego
+- ✅ Programación semanal
+- ✅ Configuración individual de sectores
+- ✅ Modo manual y automático
+- ✅ Interfaz responsive
+
+### Backend
+- ✅ API REST completa con FastAPI
+- ✅ Conexión a MySQL con pool de conexiones
+- ✅ Endpoints para todos los módulos
+- ✅ Documentación automática (Swagger)
+- ✅ Validación de datos con Pydantic
+
+### Base de Datos
+- ✅ Tablas normalizadas
+- ✅ Relaciones con claves foráneas
+- ✅ Datos de ejemplo incluidos
+- ✅ Índices para optimización
+
+## 🔧 Configuración
+
+### Conectar el Frontend con la API
+
+Por defecto, el frontend usa datos mock. Para conectarlo a la API real:
+
+1. Ve a cada archivo `.state.ts` en `front/src/`
+2. Cambia `useMock: true` a `useMock: false` en las instancias de los servicios
+
+Ejemplo en `front/src/Home/home.state.ts`:
+```typescript
+export const homeService = new HomeService('http://localhost:3000/api', false);
+```
+
+## 📚 Documentación
+
+- **API Docs (Swagger)**: http://localhost:3000/docs
+- **API ReDoc**: http://localhost:3000/redoc
+- **Frontend**: Ejecuta `npm run dev` y abre http://localhost:5173
+
+## 🛠️ Tecnologías Utilizadas
+
+### Frontend
+- React 19
+- TypeScript
+- Vite
+- Jotai (gestión de estado)
+- React Router
+
+### Backend
+- Python 3.8+
+- FastAPI
+- MySQL Connector
+- Uvicorn
+- Pydantic
+
+### Base de Datos
+- MySQL 5.7+
+
+## 📊 Modelo de Datos
+
+### Tablas Principales
+
+1. **tank_status**: Estado del tanque de agua
+2. **watering_status**: Estado actual del riego
+3. **sectors**: Información de cada sector
+4. **sector_config**: Configuración de horarios y duración
+5. **sector_days**: Días activos para cada sector
+6. **weekly_schedule**: Programación semanal general
+
+## 🔐 Seguridad
+
+- Variables de entorno para credenciales sensibles
+- Pool de conexiones para optimizar acceso a DB
+- Validación de datos en API
+- CORS configurado (ajustar para producción)
+
+## 📝 Comandos Útiles
+
+### Backend
+```bash
+# Ejecutar API en modo desarrollo
+python main.py
+
+# Ejecutar con Uvicorn directamente
+uvicorn main:app --reload --port 3000
+```
+
+### Frontend
+```bash
+# Desarrollo
+npm run dev
+
+# Build para producción
+npm run build
+
+# Preview del build
+npm run preview
+```
+
+### Base de Datos
+```bash
+# Importar schema
+mysql -u root -p < database/schema.sql
+
+# Conectar a la base de datos
+mysql -u root -p riego_db
+
+# Backup
+mysqldump -u root -p riego_db > backup.sql
+```
+
+## 🐛 Solución de Problemas
+
+### La API no se conecta a MySQL
+- Verifica que MySQL esté corriendo
+- Revisa las credenciales en `Api/.env`
+- Confirma que la base de datos existe
+
+### El frontend no muestra datos
+- Verifica que la API esté corriendo en el puerto 3000
+- Cambia `useMock` a `false` en los servicios
+- Revisa la consola del navegador para errores
+
+### Error de CORS
+- Verifica que CORS esté configurado en `Api/main.py`
+- En desarrollo, debería estar configurado para permitir todos los orígenes
+
+## 📄 Licencia
+
+Este proyecto es de código abierto.
+
+## 👨‍💻 Autor
+
+Sistema de Riego Automatizado - 2025

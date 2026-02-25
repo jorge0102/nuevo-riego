@@ -17,7 +17,7 @@ export interface MockScheduleData {
 export const mockSectors: MockSector[] = [
   {
     id: 1,
-    name: 'Sector 1: Front Lawn',
+    name: 'Sector 1: Aguacates',
     icon: 'yard',
     isActive: true,
     isAuto: true,
@@ -25,7 +25,7 @@ export const mockSectors: MockSector[] = [
   },
   {
     id: 2,
-    name: 'Sector 2: Flower Beds',
+    name: 'Sector 2: Mangos',
     icon: 'local_florist',
     isActive: false,
     isAuto: true,
@@ -33,7 +33,7 @@ export const mockSectors: MockSector[] = [
   },
   {
     id: 3,
-    name: 'Sector 3: Veggie Patch',
+    name: 'Sector 3: Pencas',
     icon: 'potted_plant',
     isActive: false,
     isAuto: true,
@@ -41,7 +41,7 @@ export const mockSectors: MockSector[] = [
   },
   {
     id: 4,
-    name: 'Sector 4: Backyard',
+    name: 'Sector 4: Pitayas',
     icon: 'grass',
     isActive: true,
     isAuto: false,
