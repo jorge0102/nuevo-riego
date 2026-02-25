@@ -13,13 +13,33 @@ export default function HomeScreen() {
   const theme = getThemeColors(scheme);
   const [tankStatus, setTankStatus] = useAtom(tankStatusAtom);
 
+  // Carga inicial: estado de riego + nivel de tanque
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        const [wateringStatus, tankLevel] = await Promise.all([
+          homeService.getWateringStatus(),
+          homeService.getTankLevel(),
+        ]);
+        setTankStatus({ ...wateringStatus, tankLevel });
+      } catch (error) {
+        console.error('Error cargando estado inicial:', error);
+      }
+    };
+    loadInitialData();
+  }, [setTankStatus]);
+
+  // Polling cada 5 segundos: nivel tanque + estado riego
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const tankLevel = await homeService.getTankLevel();
-        setTankStatus((prev) => ({ ...prev, tankLevel }));
+        const [wateringStatus, tankLevel] = await Promise.all([
+          homeService.getWateringStatus(),
+          homeService.getTankLevel(),
+        ]);
+        setTankStatus({ ...wateringStatus, tankLevel });
       } catch (error) {
-        console.error('Error actualizando nivel del tanque:', error);
+        console.error('Error actualizando estado:', error);
       }
     }, 5000);
     return () => clearInterval(interval);
@@ -38,7 +58,7 @@ export default function HomeScreen() {
   const handleManualClick = async () => {
     try {
       await homeService.startManualWatering(15);
-      setTankStatus((prev) => ({ ...prev, isWatering: true, timeRemaining: '15:00' }));
+      setTankStatus((prev) => ({ ...prev, isWatering: true, timeRemaining: '00:15' }));
     } catch (error) {
       console.error('Error iniciando riego manual:', error);
     }
@@ -48,9 +68,8 @@ export default function HomeScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.header}>
-          <Header title="Finca Eloy" onSettingsClick={() => {}} />
+          <Header title=Finca Eloy onSettingsClick={() => {}} />
         </View>
-
         <View style={styles.main}>
           <View style={styles.statusCard}>
             <MainStatusCard
@@ -59,16 +78,11 @@ export default function HomeScreen() {
               onPauseClick={handlePauseClick}
             />
           </View>
-
           <View style={styles.actionsBar}>
-            <ActionsBar
-              onManualClick={handleManualClick}
-              onHistoryClick={() => {}}
-            />
+            <ActionsBar onManualClick={handleManualClick} onHistoryClick={() => {}} />
           </View>
-
           <View style={styles.tankCard}>
-            <TankLevelCard level={tankStatus.tankLevel} label="Nivel del Estanque" />
+            <TankLevelCard level={tankStatus.tankLevel} label=Nivel del Estanque />
           </View>
         </View>
       </View>
@@ -77,28 +91,16 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-  },
-  header: {
-    height: 60,
-  },
+  safeArea: { flex: 1 },
+  container: { flex: 1 },
+  header: { height: 60 },
   main: {
     flex: 1,
     paddingHorizontal: 12,
     paddingVertical: 8,
     gap: 12,
   },
-  statusCard: {
-    flex: 4,
-  },
-  actionsBar: {
-    height: 90,
-  },
-  tankCard: {
-    height: 100,
-  },
+  statusCard: { flex: 4 },
+  actionsBar: { height: 90 },
+  tankCard: { height: 100 },
 });
