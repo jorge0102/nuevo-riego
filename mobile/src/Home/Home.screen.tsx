@@ -68,7 +68,7 @@ export default function HomeScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.header}>
-          <Header title=Finca Eloy onSettingsClick={() => {}} />
+          <Header title="Finca Eloy" onSettingsClick={() => {}} />
         </View>
         <View style={styles.main}>
           <View style={styles.statusCard}>
@@ -82,7 +82,7 @@ export default function HomeScreen() {
             <ActionsBar onManualClick={handleManualClick} onHistoryClick={() => {}} />
           </View>
           <View style={styles.tankCard}>
-            <TankLevelCard level={tankStatus.tankLevel} label=Nivel del Estanque />
+            <TankLevelCard level={tankStatus.tankLevel} label="Nivel del Estanque" />
           </View>
         </View>
       </View>
