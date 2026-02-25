@@ -59,4 +59,4 @@ class SectorConfigService {
   }
 }
 
-export const sectorConfigService = new SectorConfigService('http://localhost:3000/api', true);
+export const sectorConfigService = new SectorConfigService('http://localhost:3000/api', false);

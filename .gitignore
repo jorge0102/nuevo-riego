@@ -1,0 +1,23 @@
+# Dependencias
+node_modules/
+
+# Base de datos (datos locales, no se versiona)
+database/riego.db
+database/*.db
+
+# Entorno virtual Python
+Api/venv/
+
+# Variables de entorno con credenciales
+Api/.env
+
+# Vite cache
+.vite/
+
+# Build outputs
+front/dist/
+mobile/.expo/
+
+# OS
+.DS_Store
+*.log

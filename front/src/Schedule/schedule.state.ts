@@ -116,4 +116,4 @@ class ScheduleService {
   }
 }
 
-export const scheduleService = new ScheduleService('http://localhost:3000/api', true);
+export const scheduleService = new ScheduleService('http://localhost:3000/api', false);
