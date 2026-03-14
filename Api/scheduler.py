@@ -5,7 +5,19 @@ import logging
 logger = logging.getLogger(__name__)
 scheduler = AsyncIOScheduler()
 
+# Mapa de weekday() de Python a day_code de la BD
+DAY_MAP = {0: 'L', 1: 'M', 2: 'X', 3: 'J', 4: 'V', 5: 'S', 6: 'D'}
+
 def start_scheduler():
+    # Job cada minuto: comprueba si hay sectores auto que deben arrancar
+    scheduler.add_job(
+        _check_auto_start,
+        trigger='cron',
+        minute='*',
+        id='auto_start_check',
+        replace_existing=True,
+        misfire_grace_time=30
+    )
     scheduler.start()
     print('Scheduler de riego iniciado')
 
@@ -51,6 +63,55 @@ def get_sector_timer(sector_id: int):
             'remainingSeconds': secs
         }
     return {'scheduled': False}
+
+async def _check_auto_start():
+    """Cada minuto: arranca los sectores auto cuya hora y día coinciden."""
+    try:
+        now = datetime.now()
+        current_time = now.strftime('%H:%M')
+        current_day = DAY_MAP[now.weekday()]
+
+        from config.database import get_db_connection
+        from gpio_manager import set_relay
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # Busca sectores auto, activos en el día de hoy, con start_time == ahora
+        cursor.execute('''
+            SELECT s.id, s.name, sc.duration
+            FROM sectors s
+            JOIN sector_config sc ON s.id = sc.id
+            JOIN sector_days sd ON sd.sector_id = s.id AND sd.day_code = ?
+            WHERE s.is_auto = 1
+              AND sc.start_time = ?
+              AND sd.active = 1
+              AND s.is_active = 0
+        ''', (current_day, current_time))
+
+        sectores = cursor.fetchall()
+
+        for sector in sectores:
+            sid = sector['id']
+            sname = sector['name']
+            duration = sector['duration']
+
+            # Activar en BD
+            cursor.execute('UPDATE sectors SET is_active = 1 WHERE id = ?', (sid,))
+            conn.commit()
+
+            # Activar relé
+            set_relay(sid, True)
+
+            # Programar parada automática
+            schedule_sector_stop(sid, duration, sname)
+
+            print(f'AUTO-START: Sector {sid} ({sname}) arrancado por {duration} min')
+
+        conn.close()
+
+    except Exception as e:
+        logger.error(f'Error en auto-start check: {e}')
 
 async def _stop_sector_job(sector_id: int):
     from config.database import get_db_connection
