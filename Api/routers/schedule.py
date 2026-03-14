@@ -25,10 +25,17 @@ async def get_weekly_schedule():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT day_code, day_label, has_watering FROM weekly_schedule ORDER BY id')
-        rows = cursor.fetchall()
+        # Dias con al menos un sector en modo auto y activo ese dia
+        cursor.execute('''
+            SELECT DISTINCT sd.day_code
+            FROM sector_days sd
+            JOIN sectors s ON sd.sector_id = s.id
+            WHERE sd.active = 1 AND s.is_auto = 1
+        ''')
+        active_days = {r['day_code'] for r in cursor.fetchall()}
         conn.close()
-        return {'schedule': [{'day': r['day_code'], 'hasWatering': bool(r['has_watering'])} for r in rows]}
+        all_days = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
+        return {'schedule': [{'day': d, 'hasWatering': d in active_days} for d in all_days]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
