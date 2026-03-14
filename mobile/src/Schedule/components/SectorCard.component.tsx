@@ -6,6 +6,7 @@ import {
   StyleSheet,
   useColorScheme,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Colors, getThemeColors } from '../../theme/colors';
 import type { Sector } from '../schedule.state';
@@ -38,7 +39,11 @@ export const SectorCard: React.FC<SectorCardProps> = ({ sector, onToggle }) => {
             },
           ]}
         >
-          <Text style={styles.iconEmoji}>{sector.icon}</Text>
+          <Ionicons
+            name="leaf-outline"
+            size={28}
+            color={isPrimary ? Colors.primary : Colors.secondary}
+          />
         </View>
 
         {/* Nombre y badges */}
@@ -51,7 +56,11 @@ export const SectorCard: React.FC<SectorCardProps> = ({ sector, onToggle }) => {
                 { backgroundColor: sector.isActive ? Colors.secondary : theme.inactive },
               ]}
             >
-              <Text style={styles.badgeIcon}>{sector.isActive ? '▶' : '⏸'}</Text>
+              <Ionicons
+                name={sector.isActive ? 'pause' : 'play'}
+                size={11}
+                color={sector.isActive ? Colors.white : theme.text}
+              />
               <Text
                 style={[
                   styles.badgeText,
@@ -63,7 +72,11 @@ export const SectorCard: React.FC<SectorCardProps> = ({ sector, onToggle }) => {
             </View>
 
             <View style={[styles.badge, { backgroundColor: theme.inactive }]}>
-              <Text style={styles.badgeIcon}>{sector.isAuto ? '🤖' : '✋'}</Text>
+              <Ionicons
+                name={sector.isAuto ? 'sync-outline' : 'hand-left-outline'}
+                size={11}
+                color={theme.text}
+              />
               <Text style={[styles.badgeText, { color: theme.text }]}>
                 {sector.isAuto ? 'Auto' : 'Manual'}
               </Text>
@@ -120,9 +133,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexShrink: 0,
   },
-  iconEmoji: {
-    fontSize: 30,
-  },
   nameBlock: {
     flex: 1,
   },
@@ -146,9 +156,6 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 999,
     height: 28,
-  },
-  badgeIcon: {
-    fontSize: 12,
   },
   badgeText: {
     fontSize: 13,

@@ -2,7 +2,6 @@ import React from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
   Image,
   useColorScheme,
@@ -11,14 +10,14 @@ import { Colors, getThemeColors } from '../../theme/colors';
 
 interface MainStatusCardProps {
   isWatering: boolean;
+  sectorName: string | null;
   timeRemaining: string;
-  onPauseClick: () => void;
 }
 
 export const MainStatusCard: React.FC<MainStatusCardProps> = ({
   isWatering,
+  sectorName,
   timeRemaining,
-  onPauseClick,
 }) => {
   const scheme = useColorScheme() ?? 'light';
   const theme = getThemeColors(scheme);
@@ -34,29 +33,27 @@ export const MainStatusCard: React.FC<MainStatusCardProps> = ({
           resizeMode="cover"
         />
         <View style={styles.info}>
-          <Text style={[styles.statusText, { color: theme.text }]}>
-            {isWatering ? 'Regando' : 'Inactivo'}
-          </Text>
-          <View style={styles.timeBlock}>
-            <Text style={[styles.timeLabel, { color: theme.textMuted }]}>
-              Tiempo restante
-            </Text>
-            <Text style={[styles.timeValue, { color: theme.text }]}>
-              {timeRemaining}
+          <View style={[styles.badge, { backgroundColor: isWatering ? `${Colors.primary}22` : theme.inactive }]}>
+            <Text style={[styles.badgeText, { color: isWatering ? Colors.primary : theme.textMuted }]}>
+              {isWatering ? 'Regando' : 'Inactivo'}
             </Text>
           </View>
-          <TouchableOpacity
-            onPress={onPauseClick}
-            style={styles.actionButton}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.actionButtonIcon}>
-              {isWatering ? '⏸' : '▶️'}
+
+          {isWatering ? (
+            <>
+              <Text style={[styles.sectorName, { color: theme.text }]} numberOfLines={1}>
+                {sectorName ?? 'Sector'}
+              </Text>
+              <View style={styles.timeBlock}>
+                <Text style={[styles.timeLabel, { color: theme.textMuted }]}>Tiempo restante</Text>
+                <Text style={[styles.timeValue, { color: Colors.primary }]}>{timeRemaining}</Text>
+              </View>
+            </>
+          ) : (
+            <Text style={[styles.idleText, { color: theme.textMuted }]}>
+              Sin riego activo
             </Text>
-            <Text style={styles.actionButtonText}>
-              {isWatering ? 'Pausa' : 'Reanudar'}
-            </Text>
-          </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>
@@ -86,10 +83,20 @@ const styles = StyleSheet.create({
   info: {
     flex: 1,
     justifyContent: 'center',
-    gap: 8,
+    gap: 10,
   },
-  statusText: {
-    fontSize: 16,
+  badge: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  sectorName: {
+    fontSize: 15,
     fontWeight: '700',
     lineHeight: 20,
   },
@@ -101,26 +108,12 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   timeValue: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '700',
+    lineHeight: 26,
+  },
+  idleText: {
+    fontSize: 13,
     lineHeight: 18,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.primary,
-    borderRadius: 8,
-    height: 32,
-    paddingHorizontal: 12,
-    gap: 6,
-  },
-  actionButtonIcon: {
-    fontSize: 14,
-  },
-  actionButtonText: {
-    color: Colors.white,
-    fontSize: 12,
-    fontWeight: '600',
   },
 });

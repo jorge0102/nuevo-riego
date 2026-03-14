@@ -64,16 +64,6 @@ export default function HomeScreen() {
     return () => clearInterval(interval);
   }, [setTankStatus]);
 
-  const handlePauseClick = async () => {
-    try {
-      const action = tankStatus.isWatering ? 'pause' : 'resume';
-      await homeService.toggleWatering(action);
-      setTankStatus((prev) => ({ ...prev, isWatering: !prev.isWatering }));
-    } catch (e) {
-      console.error('Error al pausar/reanudar:', e);
-    }
-  };
-
   const handleStartManual = async (duration: number) => {
     try {
       await homeService.startManualWatering(duration);
@@ -129,8 +119,8 @@ export default function HomeScreen() {
           <View style={styles.statusCard}>
             <MainStatusCard
               isWatering={tankStatus.isWatering}
+              sectorName={tankStatus.sectorName}
               timeRemaining={tankStatus.timeRemaining}
-              onPauseClick={handlePauseClick}
             />
           </View>
           <View style={{ height: 90 }}>

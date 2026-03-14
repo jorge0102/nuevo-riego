@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, useColorScheme } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, getThemeColors } from '../../theme/colors';
 
 interface HeaderProps {
@@ -14,11 +15,11 @@ export const Header: React.FC<HeaderProps> = ({ title, onSettingsClick }) => {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.iconLeft}>
-        <Text style={[styles.icon, { color: Colors.primary }]}>☀️</Text>
+        <Ionicons name="leaf" size={22} color={Colors.primary} />
       </View>
       <Text style={[styles.title, { color: theme.text }]}>{title}</Text>
       <TouchableOpacity onPress={onSettingsClick} style={styles.iconRight}>
-        <Text style={[styles.settingsIcon, { color: theme.text }]}>⚙️</Text>
+        <Ionicons name="settings-outline" size={22} color={theme.text} />
       </TouchableOpacity>
     </View>
   );
@@ -46,11 +47,5 @@ const styles = StyleSheet.create({
   iconRight: {
     width: 40,
     alignItems: 'flex-end',
-  },
-  icon: {
-    fontSize: 22,
-  },
-  settingsIcon: {
-    fontSize: 20,
   },
 });

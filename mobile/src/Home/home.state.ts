@@ -4,6 +4,7 @@ import type { MockWeekDay } from './home.mocks';
 
 export interface TankStatus {
   isWatering: boolean;
+  sectorName: string | null;
   timeRemaining: string;
   tankLevel: number;
 }
@@ -15,6 +16,7 @@ export interface WeekDay {
 
 export const tankStatusAtom = atom<TankStatus>({
   isWatering: false,
+  sectorName: null,
   timeRemaining: '00:00',
   tankLevel: 0,
 });
@@ -28,10 +30,10 @@ class HomeService {
     return data.level;
   }
 
-  async getWateringStatus(): Promise<{ isWatering: boolean; timeRemaining: string }> {
+  async getWateringStatus(): Promise<{ isWatering: boolean; sectorName: string | null; timeRemaining: string }> {
     const res = await apiFetch('/watering/status');
     const data = await res.json();
-    return { isWatering: data.isWatering, timeRemaining: data.timeRemaining };
+    return { isWatering: data.isWatering, sectorName: data.sectorName ?? null, timeRemaining: data.timeRemaining };
   }
 
   async toggleWatering(action: 'pause' | 'resume'): Promise<void> {

@@ -7,6 +7,7 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="schedule" options={{ headerShown: false }} />
+        <Stack.Screen name="history" options={{ headerShown: false }} />
         <Stack.Screen name="sector/[id]" options={{ headerShown: false }} />
       </Stack>
     </Provider>

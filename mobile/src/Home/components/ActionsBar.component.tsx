@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, useColorScheme } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Colors, getThemeColors } from '../../theme/colors';
 
@@ -9,7 +10,7 @@ interface ActionsBarProps {
 }
 
 interface ActionItem {
-  icon: string;
+  icon: keyof typeof Ionicons.glyphMap;
   label: string;
   isPrimary?: boolean;
   onPress: () => void;
@@ -20,9 +21,9 @@ export const ActionsBar: React.FC<ActionsBarProps> = ({ onManualClick, onHistory
   const theme = getThemeColors(scheme);
 
   const actions: ActionItem[] = [
-    { icon: '💧', label: 'Manual', isPrimary: true, onPress: onManualClick },
-    { icon: '📅', label: 'Programa', onPress: () => router.push('/schedule') },
-    { icon: '📊', label: 'Historial', onPress: onHistoryClick },
+    { icon: 'water', label: 'Manual', isPrimary: true, onPress: onManualClick },
+    { icon: 'calendar-outline', label: 'Programa', onPress: () => router.push('/schedule') },
+    { icon: 'bar-chart-outline', label: 'Historial', onPress: onHistoryClick },
   ];
 
   return (
@@ -44,7 +45,11 @@ export const ActionsBar: React.FC<ActionsBarProps> = ({ onManualClick, onHistory
               },
             ]}
           >
-            <Text style={styles.icon}>{action.icon}</Text>
+            <Ionicons
+              name={action.icon}
+              size={22}
+              color={action.isPrimary ? Colors.primary : theme.text}
+            />
           </View>
           <Text style={[styles.label, { color: theme.text }]}>{action.label}</Text>
         </TouchableOpacity>
@@ -69,9 +74,6 @@ const styles = StyleSheet.create({
   iconWrapper: {
     borderRadius: 999,
     padding: 10,
-  },
-  icon: {
-    fontSize: 20,
   },
   label: {
     fontSize: 11,

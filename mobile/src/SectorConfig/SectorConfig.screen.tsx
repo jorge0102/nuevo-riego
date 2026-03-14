@@ -10,6 +10,7 @@ import {
   useColorScheme,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useAtom } from 'jotai';
 import { sectorConfigAtom, sectorConfigService, type SectorConfiguration } from './sector-config.state';
 import { getThemeColors, Colors } from '../theme/colors';
@@ -25,24 +26,58 @@ export default function SectorConfigScreen() {
   const theme = getThemeColors(scheme);
   const [config, setConfig] = useAtom(sectorConfigAtom);
   const [isSaving, setIsSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     const loadConfig = async () => {
       if (!id) return;
       try {
+        setError(false);
         const sectorConfig = await sectorConfigService.getSectorConfig(Number(id));
         setConfig(sectorConfig);
-      } catch (error) {
-        console.error('Error cargando configuración:', error);
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
       }
     };
     loadConfig();
   }, [id, setConfig]);
 
-  if (!config) {
+  if (loading) {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Text style={[styles.backIcon, { color: Colors.primary }]}>←</Text>
+          </TouchableOpacity>
+        </View>
         <ActivityIndicator size="large" color={Colors.primary} style={{ flex: 1 }} />
+      </SafeAreaView>
+    );
+  }
+
+  if (error || !config) {
+    return (
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <Text style={[styles.backIcon, { color: Colors.primary }]}>←</Text>
+          </TouchableOpacity>
+          <Text style={[styles.title, { color: theme.text }]}>Configuración</Text>
+          <View style={styles.headerRight} />
+        </View>
+        <View style={styles.errorContainer}>
+          <Ionicons name="cloud-offline-outline" size={48} color={theme.textMuted} />
+          <Text style={[styles.errorTitle, { color: theme.text }]}>Sin conexión</Text>
+          <Text style={[styles.errorText, { color: theme.textMuted }]}>
+            No se pudo cargar la configuración.{'\n'}Comprueba que el Pi está encendido.
+          </Text>
+          <TouchableOpacity onPress={() => router.back()} style={styles.retryButton}>
+            <Text style={styles.retryText}>Volver</Text>
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   }
@@ -57,8 +92,8 @@ export default function SectorConfigScreen() {
     try {
       await sectorConfigService.saveSectorConfig(config);
       router.back();
-    } catch (error) {
-      console.error('Error guardando configuración:', error);
+    } catch (e) {
+      console.error('Error guardando configuración:', e);
     } finally {
       setIsSaving(false);
     }
@@ -85,7 +120,7 @@ export default function SectorConfigScreen() {
         showsVerticalScrollIndicator={false}
       >
         <ModeToggle isAuto={config.isAuto} onChange={(isAuto) => updateConfig({ isAuto })} />
-        <DaysSelector days={config.days} onChange={(days: DayConfig[]) => updateConfig({ days })} />
+        <DaysSelector days={config.days ?? []} onChange={(days: DayConfig[]) => updateConfig({ days })} />
         <TimeDuration
           startTime={config.startTime}
           duration={config.duration}
@@ -184,5 +219,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: Colors.white,
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    padding: 32,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  errorText: {
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  retryButton: {
+    marginTop: 4,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  retryText: {
+    color: Colors.white,
+    fontWeight: '600',
+    fontSize: 14,
   },
 });
