@@ -1,10 +1,41 @@
 // Configuración central de la API
-// Si la IP del Pi cambia, solo hay que cambiarla aquí
-export const API_BASE_URL = 'http://192.168.0.19:3000/api';
+// Prueba primero la red local (más rápido), luego Tailscale (fuera de casa)
+const LOCAL_URL   = 'http://192.168.1.103:3000/api';
+const TAILSCALE_URL = 'http://100.125.188.123:3000/api';
 export const API_KEY = 'JRGXfNm5bmFF4fD_VhPW22nCl0r09bNuhIBvfXCjSJc';
 
+let cachedBaseUrl: string | null = null;
+
+async function resolveBaseUrl(): Promise<string> {
+  if (cachedBaseUrl) return cachedBaseUrl;
+
+  // Intenta local con timeout corto (1.5 s)
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 1500);
+    await fetch(LOCAL_URL + '/sectors', {
+      signal: controller.signal,
+      headers: { 'X-API-Key': API_KEY },
+    });
+    clearTimeout(timeout);
+    cachedBaseUrl = LOCAL_URL;
+    return cachedBaseUrl;
+  } catch {
+    // No alcanzable: usa Tailscale
+  }
+
+  cachedBaseUrl = TAILSCALE_URL;
+  return cachedBaseUrl;
+}
+
+// Permite forzar re-detección (p.ej. al pulsar Reintentar)
+export function resetApiUrl() {
+  cachedBaseUrl = null;
+}
+
 export async function apiFetch(path: string, options: RequestInit = {}): Promise<Response> {
-  const url = API_BASE_URL + path;
+  const baseUrl = await resolveBaseUrl();
+  const url = baseUrl + path;
   const response = await fetch(url, {
     ...options,
     headers: {
