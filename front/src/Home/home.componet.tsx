@@ -11,7 +11,7 @@ import { ManualWateringModal } from './components/manual-watering-modal.componen
 import { homeService } from './home.state';
 import { resetApiUrl } from '../config/api';
 import { appNameAtom, sectorNamesAtom, enabledSectorsAtom } from '../Settings/settings.state';
-import { sectorsAtom } from '../Schedule/schedule.module';
+import { sectorsAtom, scheduleService } from '../Schedule/schedule.module';
 
 const FALLBACK_NAMES: Record<number, string> = {
   1: 'Sector 1: Aguacates',
@@ -26,7 +26,7 @@ const Home: React.FC = () => {
   const appName = useAtomValue(appNameAtom);
   const sectorNames = useAtomValue(sectorNamesAtom);
   const enabledSectors = useAtomValue(enabledSectorsAtom);
-  const allSectors = useAtomValue(sectorsAtom);
+  const [allSectors, setAllSectors] = useAtom(sectorsAtom);
 
   const sectorOptions = allSectors.length > 0
     ? allSectors
@@ -49,13 +49,15 @@ const Home: React.FC = () => {
   const loadInitialData = async () => {
     try {
       setError(false);
-      const [wateringStatus, tankLevel, schedule] = await Promise.all([
+      const [wateringStatus, tankLevel, schedule, sectors] = await Promise.all([
         homeService.getWateringStatus(),
         homeService.getTankLevel(),
         homeService.getWeeklySchedule(),
+        scheduleService.getSectors(),
       ]);
       setTankStatus({ ...wateringStatus, tankLevel });
       setWeeklySchedule(schedule);
+      setAllSectors(sectors);
     } catch {
       setError(true);
     } finally {
@@ -68,22 +70,24 @@ const Home: React.FC = () => {
     loadInitialData();
   }, []);
 
-  // Polling cada 5 segundos: nivel tanque + estado riego
+  // Polling cada 5 segundos: nivel tanque + estado riego + sectores activos
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const [wateringStatus, tankLevel] = await Promise.all([
+        const [wateringStatus, tankLevel, sectors] = await Promise.all([
           homeService.getWateringStatus(),
           homeService.getTankLevel(),
+          scheduleService.getSectors(),
         ]);
         setTankStatus({ ...wateringStatus, tankLevel });
+        setAllSectors(sectors);
         setError(false);
       } catch {
         // mantener datos actuales en segundo plano
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, [setTankStatus]);
+  }, [setTankStatus, setAllSectors]);
 
   const handlePauseClick = async () => {
     try {
