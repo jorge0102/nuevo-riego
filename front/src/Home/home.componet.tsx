@@ -13,6 +13,13 @@ import { resetApiUrl } from '../config/api';
 import { appNameAtom, sectorNamesAtom, enabledSectorsAtom } from '../Settings/settings.state';
 import { sectorsAtom } from '../Schedule/schedule.module';
 
+const FALLBACK_NAMES: Record<number, string> = {
+  1: 'Sector 1: Aguacates',
+  2: 'Sector 2: Mangos',
+  3: 'Sector 3: Pencas',
+  4: 'Sector 4: Pitayas',
+};
+
 const Home: React.FC = () => {
   const [tankStatus, setTankStatus] = useAtom(tankStatusAtom);
   const [weeklySchedule, setWeeklySchedule] = useAtom(weeklyScheduleAtom);
@@ -21,9 +28,13 @@ const Home: React.FC = () => {
   const enabledSectors = useAtomValue(enabledSectorsAtom);
   const allSectors = useAtomValue(sectorsAtom);
 
-  const sectorOptions = allSectors
-    .filter((s) => enabledSectors[s.id] ?? true)
-    .map((s) => ({ id: s.id, name: sectorNames[s.id] ?? s.name }));
+  const sectorOptions = allSectors.length > 0
+    ? allSectors
+        .filter((s) => enabledSectors[s.id] ?? true)
+        .map((s) => ({ id: s.id, name: sectorNames[s.id] ?? s.name }))
+    : [1, 2, 3, 4]
+        .filter((id) => enabledSectors[id] ?? true)
+        .map((id) => ({ id, name: sectorNames[id] ?? FALLBACK_NAMES[id] ?? `Sector ${id}` }));
 
   const activeSectorCount = allSectors.filter((s) => s.isActive).length;
   const [showManualModal, setShowManualModal] = useState(false);
