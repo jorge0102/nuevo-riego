@@ -54,11 +54,11 @@ class HomeService {
     } catch { /* la UI usa actualización optimista */ }
   }
 
-  async startManualWatering(duration: number): Promise<void> {
+  async startManualWatering(sectorId: number, duration: number): Promise<void> {
     try {
       await apiFetch('/watering/manual', {
         method: 'POST',
-        body: JSON.stringify({ duration }),
+        body: JSON.stringify({ sectorId, duration }),
       });
     } catch { /* la UI usa actualización optimista */ }
   }

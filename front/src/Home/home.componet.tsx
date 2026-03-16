@@ -10,13 +10,22 @@ import { WeeklySchedule } from './components/weekly-schedule.component';
 import { ManualWateringModal } from './components/manual-watering-modal.component';
 import { homeService } from './home.state';
 import { resetApiUrl } from '../config/api';
-import { appNameAtom, sectorNamesAtom } from '../Settings/settings.state';
+import { appNameAtom, sectorNamesAtom, enabledSectorsAtom } from '../Settings/settings.state';
+import { sectorsAtom } from '../Schedule/schedule.module';
 
 const Home: React.FC = () => {
   const [tankStatus, setTankStatus] = useAtom(tankStatusAtom);
   const [weeklySchedule, setWeeklySchedule] = useAtom(weeklyScheduleAtom);
   const appName = useAtomValue(appNameAtom);
   const sectorNames = useAtomValue(sectorNamesAtom);
+  const enabledSectors = useAtomValue(enabledSectorsAtom);
+  const allSectors = useAtomValue(sectorsAtom);
+
+  const sectorOptions = allSectors
+    .filter((s) => enabledSectors[s.id] ?? true)
+    .map((s) => ({ id: s.id, name: sectorNames[s.id] ?? s.name }));
+
+  const activeSectorCount = allSectors.filter((s) => s.isActive).length;
   const [showManualModal, setShowManualModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -75,9 +84,9 @@ const Home: React.FC = () => {
     }
   };
 
-  const handleStartManual = async (duration: number) => {
+  const handleStartManual = async (sectorId: number, duration: number) => {
     try {
-      await homeService.startManualWatering(duration);
+      await homeService.startManualWatering(sectorId, duration);
       const mins = String(duration).padStart(2, '0');
       setTankStatus((prev) => ({ ...prev, isWatering: true, timeRemaining: `${mins}:00` }));
     } catch (e) {
@@ -176,6 +185,8 @@ const Home: React.FC = () => {
         visible={showManualModal}
         onClose={() => setShowManualModal(false)}
         onStart={handleStartManual}
+        sectors={sectorOptions}
+        activeSectorCount={activeSectorCount}
       />
     </div>
   );
