@@ -9,17 +9,31 @@ interface TimeDurationProps {
 }
 
 function useHold(action: () => void) {
+  const actionRef = useRef(action);
+  actionRef.current = action; // siempre apunta a la versión más reciente del closure
+
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clear = () => {
+    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+    if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
+  };
+
   const start = () => {
-    action();
-    intervalRef.current = setInterval(action, 120);
+    actionRef.current();
+    intervalRef.current = setInterval(() => actionRef.current(), 200);
+    timeoutRef.current = setTimeout(() => {
+      clear();
+      intervalRef.current = setInterval(() => actionRef.current(), 80);
+      timeoutRef.current = setTimeout(() => {
+        clear();
+        intervalRef.current = setInterval(() => actionRef.current(), 35);
+      }, 900);
+    }, 600);
   };
-  const stop = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-  };
+
+  const stop = clear;
   return { start, stop };
 }
 
@@ -117,28 +131,28 @@ export const TimeDuration: React.FC<TimeDurationProps> = ({
           <label className="text-sm font-medium text-text-light/80 dark:text-text-dark/80">Duración</label>
 
           <div className="flex items-center gap-3">
-            <button
-              className={`${btnClass} w-12 h-12`}
-              onMouseDown={holdDurDown.start} onMouseUp={holdDurDown.stop} onMouseLeave={holdDurDown.stop}
-              onTouchStart={holdDurDown.start} onTouchEnd={holdDurDown.stop}
-              disabled={duration <= 1}
-            >
-              <span className="material-symbols-outlined text-2xl">remove</span>
-            </button>
-
-            <div className="flex flex-col items-center">
-              <span className="text-4xl font-bold tabular-nums leading-none">{duration}</span>
-              <span className="text-xs text-text-light/60 dark:text-text-dark/60 mt-1">minutos</span>
+            <div className="flex flex-col items-center gap-1">
+              <button
+                className={`${btnClass} w-10 h-10`}
+                onMouseDown={holdDurUp.start} onMouseUp={holdDurUp.stop} onMouseLeave={holdDurUp.stop}
+                onTouchStart={holdDurUp.start} onTouchEnd={holdDurUp.stop}
+                disabled={duration >= 180}
+              >
+                <span className="material-symbols-outlined text-xl">expand_less</span>
+              </button>
+              <div className="flex flex-col items-center w-12">
+                <span className="text-3xl font-bold tabular-nums leading-none">{duration}</span>
+                <span className="text-xs text-text-light/60 dark:text-text-dark/60 mt-1">min</span>
+              </div>
+              <button
+                className={`${btnClass} w-10 h-10`}
+                onMouseDown={holdDurDown.start} onMouseUp={holdDurDown.stop} onMouseLeave={holdDurDown.stop}
+                onTouchStart={holdDurDown.start} onTouchEnd={holdDurDown.stop}
+                disabled={duration <= 1}
+              >
+                <span className="material-symbols-outlined text-xl">expand_more</span>
+              </button>
             </div>
-
-            <button
-              className={`${btnClass} w-12 h-12`}
-              onMouseDown={holdDurUp.start} onMouseUp={holdDurUp.stop} onMouseLeave={holdDurUp.stop}
-              onTouchStart={holdDurUp.start} onTouchEnd={holdDurUp.stop}
-              disabled={duration >= 180}
-            >
-              <span className="material-symbols-outlined text-2xl">add</span>
-            </button>
           </div>
         </div>
       </div>
