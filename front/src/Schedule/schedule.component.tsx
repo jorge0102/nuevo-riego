@@ -67,7 +67,7 @@ const Schedule: React.FC = () => {
   if (loading) {
     return (
       <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
-        <ScheduleHeader title="Volver Menú" onSettingsClick={() => {}} />
+        <ScheduleHeader title="Volver Menú" />
         <div className="flex-1 flex items-center justify-center py-20">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
@@ -78,7 +78,7 @@ const Schedule: React.FC = () => {
   if (error) {
     return (
       <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
-        <ScheduleHeader title="Volver Menú" onSettingsClick={() => {}} />
+        <ScheduleHeader title="Volver Menú" />
         <div className="flex-1 flex flex-col items-center justify-center gap-3 p-8 text-center py-20">
           <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-5xl">cloud_off</span>
           <p className="text-lg font-bold">Sin conexión</p>
@@ -98,7 +98,7 @@ const Schedule: React.FC = () => {
 
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
-      <ScheduleHeader title="Volver Menú" onSettingsClick={() => {}} />
+      <ScheduleHeader title="Volver Menú" />
 
       <main className="flex-grow p-4 pt-2">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

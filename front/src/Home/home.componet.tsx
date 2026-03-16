@@ -1,8 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAtom, useAtomValue } from 'jotai';
-import { isDarkModeAtom, tankStatusAtom, weeklyScheduleAtom } from './home.module';
+import { tankStatusAtom, weeklyScheduleAtom } from './home.module';
 import { ActionsBar } from './components/actions-bar.component';
 import { Header } from './components/header.componet';
 import { MainStatusCard } from './components/main-status-card.component';
@@ -14,10 +13,8 @@ import { resetApiUrl } from '../config/api';
 import { appNameAtom, sectorNamesAtom } from '../Settings/settings.state';
 
 const Home: React.FC = () => {
-  const navigate = useNavigate();
   const [tankStatus, setTankStatus] = useAtom(tankStatusAtom);
   const [weeklySchedule, setWeeklySchedule] = useAtom(weeklyScheduleAtom);
-  const isDarkMode = useAtomValue(isDarkModeAtom);
   const appName = useAtomValue(appNameAtom);
   const sectorNames = useAtomValue(sectorNamesAtom);
   const [showManualModal, setShowManualModal] = useState(false);
@@ -89,20 +86,16 @@ const Home: React.FC = () => {
     }
   };
 
-  const handleSettingsClick = () => {
-    navigate('/settings');
-  };
-
   const handleHistoryClick = () => {
     console.log('Historial clickeado');
   };
 
   if (loading) {
     return (
-      <div className={`h-screen flex flex-col overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
+      <div className="h-screen flex flex-col overflow-hidden">
         <div className="h-full flex flex-col font-display bg-background-light dark:bg-background-dark overflow-hidden">
           <div className="flex-shrink-0" style={{ height: '60px' }}>
-            <Header title={appName} onSettingsClick={handleSettingsClick} />
+            <Header title={appName} />
           </div>
           <div className="flex-1 flex items-center justify-center">
             <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -114,10 +107,10 @@ const Home: React.FC = () => {
 
   if (error) {
     return (
-      <div className={`h-screen flex flex-col overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
+      <div className="h-screen flex flex-col overflow-hidden">
         <div className="h-full flex flex-col font-display bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 overflow-hidden">
           <div className="flex-shrink-0" style={{ height: '60px' }}>
-            <Header title={appName} onSettingsClick={handleSettingsClick} />
+            <Header title={appName} />
           </div>
           <div className="flex-1 flex flex-col items-center justify-center gap-3 p-8 text-center">
             <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-5xl">cloud_off</span>
@@ -139,12 +132,12 @@ const Home: React.FC = () => {
 
   return (
     <div
-      className={`h-screen flex flex-col overflow-hidden ${isDarkMode ? 'dark' : ''}`}
+      className="h-screen flex flex-col overflow-hidden"
       style={{ height: '100vh', maxHeight: '100vh' }}
     >
       <div className="h-full flex flex-col font-display bg-background-light dark:bg-background-dark text-[#101922] dark:text-gray-200 overflow-hidden">
         <div className="flex-shrink-0" style={{ height: '60px' }}>
-          <Header title={appName} onSettingsClick={handleSettingsClick} />
+          <Header title={appName} />
         </div>
 
         <main
