@@ -77,7 +77,6 @@ const Settings: React.FC = () => {
                         onChange={() => handleToggleEnabled(id)}
                       />
                       <div
-                        onClick={() => handleToggleEnabled(id)}
                         className={`w-full h-full rounded-full transition-colors ${isEnabled ? 'bg-primary' : 'bg-inactive-light dark:bg-inactive-dark'}`}
                       >
                         <div
