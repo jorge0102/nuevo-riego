@@ -1,7 +1,9 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAtomValue } from 'jotai';
 import type { Sector } from '../schedule.state';
+import { sectorNamesAtom } from '../../Settings/settings.state';
 
 
 interface SectorCardProps {
@@ -12,6 +14,8 @@ interface SectorCardProps {
 
 export const SectorCard: React.FC<SectorCardProps> = ({ sector, onToggle }) => {
   const navigate = useNavigate();
+  const sectorNames = useAtomValue(sectorNamesAtom);
+  const displayName = sectorNames[sector.id] ?? sector.name;
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -39,7 +43,7 @@ export const SectorCard: React.FC<SectorCardProps> = ({ sector, onToggle }) => {
         </div>
         
         <div className="flex-grow">
-          <p className="text-lg font-bold leading-tight tracking-[-0.015em]">{sector.name}</p>
+          <p className="text-lg font-bold leading-tight tracking-[-0.015em]">{displayName}</p>
           <div className="flex gap-2 pt-2 flex-wrap">
             <div 
               className={`flex h-7 shrink-0 items-center justify-center gap-x-2 rounded-full px-3 ${

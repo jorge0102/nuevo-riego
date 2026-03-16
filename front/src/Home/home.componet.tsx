@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAtom, useAtomValue } from 'jotai';
 import { isDarkModeAtom, tankStatusAtom, weeklyScheduleAtom } from './home.module';
 import { ActionsBar } from './components/actions-bar.component';
@@ -10,14 +11,23 @@ import { WeeklySchedule } from './components/weekly-schedule.component';
 import { ManualWateringModal } from './components/manual-watering-modal.component';
 import { homeService } from './home.state';
 import { resetApiUrl } from '../config/api';
+import { appNameAtom, sectorNamesAtom } from '../Settings/settings.state';
 
 const Home: React.FC = () => {
+  const navigate = useNavigate();
   const [tankStatus, setTankStatus] = useAtom(tankStatusAtom);
   const [weeklySchedule, setWeeklySchedule] = useAtom(weeklyScheduleAtom);
   const isDarkMode = useAtomValue(isDarkModeAtom);
+  const appName = useAtomValue(appNameAtom);
+  const sectorNames = useAtomValue(sectorNamesAtom);
   const [showManualModal, setShowManualModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  const resolvedSectorName =
+    tankStatus.sectorId != null && sectorNames[tankStatus.sectorId]
+      ? sectorNames[tankStatus.sectorId]
+      : tankStatus.sectorName;
 
   const loadInitialData = async () => {
     try {
@@ -80,7 +90,7 @@ const Home: React.FC = () => {
   };
 
   const handleSettingsClick = () => {
-    console.log('Configuración clickeada');
+    navigate('/settings');
   };
 
   const handleHistoryClick = () => {
@@ -92,7 +102,7 @@ const Home: React.FC = () => {
       <div className={`h-screen flex flex-col overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
         <div className="h-full flex flex-col font-display bg-background-light dark:bg-background-dark overflow-hidden">
           <div className="flex-shrink-0" style={{ height: '60px' }}>
-            <Header title="Finca Eloy" onSettingsClick={handleSettingsClick} />
+            <Header title={appName} onSettingsClick={handleSettingsClick} />
           </div>
           <div className="flex-1 flex items-center justify-center">
             <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
@@ -107,7 +117,7 @@ const Home: React.FC = () => {
       <div className={`h-screen flex flex-col overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
         <div className="h-full flex flex-col font-display bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 overflow-hidden">
           <div className="flex-shrink-0" style={{ height: '60px' }}>
-            <Header title="Finca Eloy" onSettingsClick={handleSettingsClick} />
+            <Header title={appName} onSettingsClick={handleSettingsClick} />
           </div>
           <div className="flex-1 flex flex-col items-center justify-center gap-3 p-8 text-center">
             <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-5xl">cloud_off</span>
@@ -134,7 +144,7 @@ const Home: React.FC = () => {
     >
       <div className="h-full flex flex-col font-display bg-background-light dark:bg-background-dark text-[#101922] dark:text-gray-200 overflow-hidden">
         <div className="flex-shrink-0" style={{ height: '60px' }}>
-          <Header title="Finca Eloy" onSettingsClick={handleSettingsClick} />
+          <Header title={appName} onSettingsClick={handleSettingsClick} />
         </div>
 
         <main
@@ -144,7 +154,7 @@ const Home: React.FC = () => {
           <div className="flex-shrink-0" style={{ height: '35%' }}>
             <MainStatusCard
               isWatering={tankStatus.isWatering}
-              sectorName={tankStatus.sectorName}
+              sectorName={resolvedSectorName}
               timeRemaining={tankStatus.timeRemaining}
               onPauseClick={handlePauseClick}
             />
