@@ -1,15 +1,18 @@
 
 import React, { useEffect, useCallback, useState } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { sectorsAtom, scheduleService } from './schedule.module';
 import { ScheduleHeader } from './components/schedule-header.component';
 import { SectorCard } from './components/sector-card.component';
 import { resetApiUrl } from '../config/api';
+import { enabledSectorsAtom } from '../Settings/settings.state';
 
 const Schedule: React.FC = () => {
   const [sectors, setSectors] = useAtom(sectorsAtom);
+  const enabledSectors = useAtomValue(enabledSectorsAtom);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const visibleSectors = sectors.filter((s) => enabledSectors[s.id] ?? true);
 
   const loadSectors = useCallback(async () => {
     try {
@@ -99,7 +102,7 @@ const Schedule: React.FC = () => {
 
       <main className="flex-grow p-4 pt-2">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {sectors.map((sector) => (
+          {visibleSectors.map((sector) => (
             <SectorCard
               key={sector.id}
               sector={sector}

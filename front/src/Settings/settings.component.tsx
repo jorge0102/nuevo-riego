@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
-import { appNameAtom, sectorNamesAtom } from './settings.state';
+import { appNameAtom, sectorNamesAtom, enabledSectorsAtom } from './settings.state';
 
 const DEFAULT_SECTOR_NAMES: Record<number, string> = {
   1: 'Sector 1: Aguacates',
@@ -15,12 +15,17 @@ const Settings: React.FC = () => {
   const navigate = useNavigate();
   const [appName, setAppName] = useAtom(appNameAtom);
   const [sectorNames, setSectorNames] = useAtom(sectorNamesAtom);
+  const [enabledSectors, setEnabledSectors] = useAtom(enabledSectorsAtom);
 
   const getSectorName = (id: number) =>
     sectorNames[id] ?? DEFAULT_SECTOR_NAMES[id] ?? `Sector ${id}`;
 
   const handleSectorName = (id: number, value: string) => {
     setSectorNames((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleToggleEnabled = (id: number) => {
+    setEnabledSectors((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   return (
@@ -51,27 +56,51 @@ const Settings: React.FC = () => {
           />
         </section>
 
-        {/* Nombres de sectores */}
+        {/* Sectores */}
         <section className="flex flex-col gap-3 rounded-xl bg-surface-light dark:bg-surface-dark p-4">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary">yard</span>
-            <h2 className="text-base font-semibold">Nombres de sectores</h2>
+            <h2 className="text-base font-semibold">Sectores</h2>
           </div>
-          <div className="flex flex-col gap-3">
-            {[1, 2, 3, 4].map((id) => (
-              <div key={id} className="flex flex-col gap-1">
-                <label className="text-xs text-gray-500 dark:text-gray-400 font-medium">
-                  Sector {id}
-                </label>
-                <input
-                  type="text"
-                  value={getSectorName(id)}
-                  onChange={(e) => handleSectorName(id, e.target.value)}
-                  placeholder={DEFAULT_SECTOR_NAMES[id]}
-                  className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-background-light dark:bg-background-dark px-4 py-3 text-sm font-medium outline-none focus:border-primary transition-colors"
-                />
-              </div>
-            ))}
+          <div className="flex flex-col gap-4">
+            {[1, 2, 3, 4].map((id) => {
+              const isEnabled = enabledSectors[id] ?? true;
+              return (
+                <div key={id} className={`flex flex-col gap-2 rounded-lg p-3 border transition-colors ${isEnabled ? 'border-primary/30 bg-primary/5' : 'border-gray-200 dark:border-gray-700 opacity-50'}`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold">Sector {id}</span>
+                    <label className="relative flex h-[28px] w-[46px] cursor-pointer items-center rounded-full p-0.5">
+                      <input
+                        type="checkbox"
+                        className="invisible absolute"
+                        checked={isEnabled}
+                        onChange={() => handleToggleEnabled(id)}
+                      />
+                      <div
+                        onClick={() => handleToggleEnabled(id)}
+                        className={`w-full h-full rounded-full transition-colors ${isEnabled ? 'bg-primary' : 'bg-inactive-light dark:bg-inactive-dark'}`}
+                      >
+                        <div
+                          className="h-[24px] w-[24px] rounded-full bg-white transition-transform duration-200 ease-in-out mt-[0px]"
+                          style={{
+                            transform: isEnabled ? 'translateX(18px)' : 'translateX(0px)',
+                            boxShadow: 'rgba(0,0,0,0.1) 0px 2px 4px',
+                          }}
+                        />
+                      </div>
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    value={getSectorName(id)}
+                    onChange={(e) => handleSectorName(id, e.target.value)}
+                    placeholder={DEFAULT_SECTOR_NAMES[id]}
+                    disabled={!isEnabled}
+                    className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-background-light dark:bg-background-dark px-4 py-2.5 text-sm font-medium outline-none focus:border-primary transition-colors disabled:cursor-not-allowed"
+                  />
+                </div>
+              );
+            })}
           </div>
         </section>
 
@@ -80,6 +109,7 @@ const Settings: React.FC = () => {
           onClick={() => {
             setAppName('Finca Eloy');
             setSectorNames({});
+            setEnabledSectors({ 1: true, 2: true, 3: true, 4: true });
           }}
           className="w-full rounded-xl border-2 border-gray-200 dark:border-gray-700 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:bg-surface-light dark:hover:bg-surface-dark transition-colors"
         >
