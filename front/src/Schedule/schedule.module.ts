@@ -1,8 +1,6 @@
 
-export { 
-  tankLevelAtom,
+export {
   sectorsAtom,
   scheduleService,
   type Sector,
-  type ScheduleState 
 } from './schedule.state';

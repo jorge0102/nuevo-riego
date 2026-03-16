@@ -29,7 +29,7 @@ export const mockTankStatus: MockTankStatus = {
 export const mockWeeklySchedule: MockWeekDay[] = [
   { day: 'L', hasWatering: false },
   { day: 'M', hasWatering: true },
-  { day: 'M', hasWatering: false },
+  { day: 'X', hasWatering: false },
   { day: 'J', hasWatering: true },
   { day: 'V', hasWatering: false },
   { day: 'S', hasWatering: true },

@@ -3,12 +3,14 @@ import React from 'react';
 
 interface MainStatusCardProps {
   isWatering: boolean;
+  sectorName: string | null;
   timeRemaining: string;
   onPauseClick: () => void;
 }
 
 export const MainStatusCard: React.FC<MainStatusCardProps> = ({
   isWatering,
+  sectorName,
   timeRemaining,
   onPauseClick,
 }) => {
@@ -21,19 +23,38 @@ export const MainStatusCard: React.FC<MainStatusCardProps> = ({
             backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuCX-qI75F7I9Fa-okePuaRZ_0QHhGei-f3Kk8P1erR5GRHqZC-LctGboERU9Uo5ZkBT2HjHr4D5XU5GYmeQeV3KxlfJXgW1aF-hAuIbwTBoJBKJ273-ljPBj_CaLUZGZttHest-7vvFgZ5mx9SeNGv7n5rglJcAMtyC8KtX8IiIYZWdIZwLuC7h94t2oNNf-oW1RMn4BPkyYcH0_YPald_oLorEMndY5rNZ7Ckj-5DKABj_uWCDOmm50gYoPWAekVQus5h12NuLr8SW")`,
           }}
         />
-        
+
         <div className="flex-1 flex flex-col justify-center gap-2">
-          <p className="text-base font-bold leading-tight">
+          <span
+            className={`self-start px-2.5 py-1 rounded-full text-xs font-bold ${
+              isWatering
+                ? 'bg-primary/10 text-primary'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+            }`}
+          >
             {isWatering ? 'Regando' : 'Inactivo'}
-          </p>
-          <div className="flex flex-col gap-1">
-            <p className="text-gray-500 dark:text-gray-400 text-xs leading-tight">
-              Tiempo restante
+          </span>
+
+          {isWatering ? (
+            <>
+              <p className="text-sm font-bold leading-tight truncate text-gray-900 dark:text-gray-100">
+                {sectorName ?? 'Sector'}
+              </p>
+              <div className="flex flex-col gap-0.5">
+                <p className="text-gray-500 dark:text-gray-400 text-xs leading-tight">
+                  Tiempo restante
+                </p>
+                <p className="text-primary text-xl font-bold leading-tight">
+                  {timeRemaining}
+                </p>
+              </div>
+            </>
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400 text-sm leading-tight">
+              Sin riego activo
             </p>
-            <p className="text-inherit text-sm font-semibold leading-tight">
-              {timeRemaining}
-            </p>
-          </div>
+          )}
+
           <button
             onClick={onPauseClick}
             className="flex items-center justify-center rounded-lg h-8 px-3 bg-primary text-white text-xs font-medium leading-normal gap-1.5 hover:bg-primary/90 transition-colors"
