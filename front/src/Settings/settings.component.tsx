@@ -66,7 +66,7 @@ const Settings: React.FC = () => {
             {[1, 2, 3, 4].map((id) => {
               const isEnabled = enabledSectors[id] ?? true;
               return (
-                <div key={id} className={`flex flex-col gap-2 rounded-lg p-3 border transition-colors ${isEnabled ? 'border-primary/30 bg-primary/5' : 'border-gray-200 dark:border-gray-700 opacity-50'}`}>
+                <div key={id} className={`flex flex-col gap-2 rounded-lg p-3 border transition-colors ${isEnabled ? 'border-primary/30 bg-primary/5' : 'border-gray-200 dark:border-gray-700'}`}>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold">Sector {id}</span>
                     <label className="relative flex h-[28px] w-[46px] cursor-pointer items-center rounded-full p-0.5">
@@ -96,7 +96,7 @@ const Settings: React.FC = () => {
                     onChange={(e) => handleSectorName(id, e.target.value)}
                     placeholder={DEFAULT_SECTOR_NAMES[id]}
                     disabled={!isEnabled}
-                    className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-background-light dark:bg-background-dark px-4 py-2.5 text-sm font-medium outline-none focus:border-primary transition-colors disabled:cursor-not-allowed"
+                    className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-background-light dark:bg-background-dark px-4 py-2.5 text-sm font-medium outline-none focus:border-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   />
                 </div>
               );
