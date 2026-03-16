@@ -1,8 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { sectorConfigAtom, sectorConfigService, type SectorConfiguration } from './sector-config.module';
+import { sectorNamesAtom } from '../Settings/settings.state';
 import { ConfigHeader } from './components/config-header.component';
 import { ModeToggle } from './components/mode-toggle.component';
 import { DaysSelector } from './components/days-selector.component';
@@ -13,6 +14,8 @@ const SectorConfig: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [config, setConfig] = useAtom(sectorConfigAtom);
+  const sectorNames = useAtomValue(sectorNamesAtom);
+  const displayName = config ? (sectorNames[config.id] ?? config.name) : '';
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -87,7 +90,7 @@ const SectorConfig: React.FC = () => {
 
   return (
     <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden p-4 md:p-6 lg:p-8 bg-background-light dark:bg-background-dark font-display text-text-light dark:text-text-dark">
-      <ConfigHeader title={config.name} icon={config.icon} />
+      <ConfigHeader title={displayName} icon={config.icon} />
 
       <div className="flex flex-col gap-6">
         <ModeToggle
