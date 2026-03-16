@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 const MAX_ACTIVE = 2;
-const DURATION_OPTIONS = [5, 10, 15, 30, 45, 60];
+const MIN_DURATION = 1;
+const MAX_DURATION = 120;
+const QUICK_PRESETS = [5, 10, 15, 30];
 
 export interface SectorOption {
   id: number;
@@ -24,19 +26,36 @@ export const ManualWateringModal: React.FC<ManualWateringModalProps> = ({
   activeSectorCount,
 }) => {
   const [selectedSectorId, setSelectedSectorId] = useState<number | null>(null);
-  const [selectedDuration, setSelectedDuration] = useState(15);
+  const [duration, setDuration] = useState(15);
   const [isLoading, setIsLoading] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   if (!visible) return null;
 
   const wouldExceedLimit = activeSectorCount >= MAX_ACTIVE;
   const canStart = selectedSectorId !== null && !wouldExceedLimit;
 
+  const changeDuration = (delta: number) => {
+    setDuration((prev) => Math.min(MAX_DURATION, Math.max(MIN_DURATION, prev + delta)));
+  };
+
+  // Pulsación larga: acelera el cambio
+  const startHold = (delta: number) => {
+    changeDuration(delta);
+    intervalRef.current = setInterval(() => changeDuration(delta), 120);
+  };
+  const stopHold = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
   const handleStart = async () => {
     if (!canStart || selectedSectorId === null) return;
     setIsLoading(true);
     try {
-      await onStart(selectedSectorId, selectedDuration);
+      await onStart(selectedSectorId, duration);
       onClose();
     } finally {
       setIsLoading(false);
@@ -61,9 +80,7 @@ export const ManualWateringModal: React.FC<ManualWateringModalProps> = ({
           </div>
           <div className="flex-1">
             <p className="text-base font-bold text-gray-900 dark:text-gray-100">Riego Manual</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Selecciona sector y duración
-            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Selecciona sector y duración</p>
           </div>
           <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600">
             <span className="material-symbols-outlined text-xl">close</span>
@@ -85,9 +102,7 @@ export const ManualWateringModal: React.FC<ManualWateringModalProps> = ({
 
         {/* Sector */}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
-            Sector
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">Sector</p>
           <div className="flex flex-col gap-2">
             {sectors.length === 0 ? (
               <p className="text-sm text-gray-400 dark:text-gray-500">No hay sectores disponibles</p>
@@ -105,9 +120,7 @@ export const ManualWateringModal: React.FC<ManualWateringModalProps> = ({
                         : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
                     }`}
                   >
-                    <span className={`material-symbols-outlined text-lg ${isSelected ? 'text-white' : 'text-primary'}`}>
-                      yard
-                    </span>
+                    <span className={`material-symbols-outlined text-lg ${isSelected ? 'text-white' : 'text-primary'}`}>yard</span>
                     {s.name}
                   </button>
                 );
@@ -116,32 +129,65 @@ export const ManualWateringModal: React.FC<ManualWateringModalProps> = ({
           </div>
         </div>
 
-        {/* Duración */}
+        {/* Duración — stepper */}
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2">
-            Duración
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {DURATION_OPTIONS.map((min) => {
-              const isSelected = selectedDuration === min;
-              return (
-                <button
-                  key={min}
-                  onClick={() => setSelectedDuration(min)}
-                  className={`px-4 py-2.5 rounded-lg text-sm font-semibold min-w-[72px] transition-colors ${
-                    isSelected
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
-                  }`}
-                >
-                  {min} min
-                </button>
-              );
-            })}
+          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-3">Duración</p>
+
+          {/* Rueda / stepper */}
+          <div className="flex items-center justify-between gap-3 mb-3">
+            <button
+              onMouseDown={() => startHold(-1)}
+              onMouseUp={stopHold}
+              onMouseLeave={stopHold}
+              onTouchStart={() => startHold(-1)}
+              onTouchEnd={stopHold}
+              disabled={duration <= MIN_DURATION}
+              className="flex items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{ width: 56, height: 56 }}
+            >
+              <span className="material-symbols-outlined text-3xl">remove</span>
+            </button>
+
+            <div className="flex-1 flex flex-col items-center">
+              <span className="text-5xl font-bold tabular-nums leading-none text-gray-900 dark:text-gray-100">
+                {duration}
+              </span>
+              <span className="text-sm text-gray-500 dark:text-gray-400 mt-1">minutos</span>
+            </div>
+
+            <button
+              onMouseDown={() => startHold(1)}
+              onMouseUp={stopHold}
+              onMouseLeave={stopHold}
+              onTouchStart={() => startHold(1)}
+              onTouchEnd={stopHold}
+              disabled={duration >= MAX_DURATION}
+              className="flex items-center justify-center rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 active:scale-95 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{ width: 56, height: 56 }}
+            >
+              <span className="material-symbols-outlined text-3xl">add</span>
+            </button>
+          </div>
+
+          {/* Presets rápidos */}
+          <div className="flex gap-2">
+            {QUICK_PRESETS.map((min) => (
+              <button
+                key={min}
+                onClick={() => setDuration(min)}
+                className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                  duration === min
+                    ? 'bg-primary/15 text-primary border border-primary/30'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
+              >
+                {min} min
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Botón */}
+        {/* Botón arrancar */}
         <button
           onClick={handleStart}
           disabled={!canStart || isLoading}
@@ -154,9 +200,7 @@ export const ManualWateringModal: React.FC<ManualWateringModalProps> = ({
             <>
               <span className="material-symbols-outlined text-lg">play_arrow</span>
               <span>
-                {selectedSectorId === null
-                  ? 'Selecciona un sector'
-                  : `Iniciar ${selectedDuration} min`}
+                {selectedSectorId === null ? 'Selecciona un sector' : `Iniciar ${duration} min`}
               </span>
             </>
           )}
