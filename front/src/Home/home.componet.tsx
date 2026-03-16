@@ -1,68 +1,131 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
-import { isDarkModeAtom, tankStatusAtom } from './home.module';
+import { isDarkModeAtom, tankStatusAtom, weeklyScheduleAtom } from './home.module';
 import { ActionsBar } from './components/actions-bar.component';
 import { Header } from './components/header.componet';
 import { MainStatusCard } from './components/main-status-card.component';
 import { TankLevelCard } from './components/tank-level-card.component';
+import { WeeklySchedule } from './components/weekly-schedule.component';
+import { ManualWateringModal } from './components/manual-watering-modal.component';
 import { homeService } from './home.state';
+import { resetApiUrl } from '../config/api';
 
 const Home: React.FC = () => {
   const [tankStatus, setTankStatus] = useAtom(tankStatusAtom);
+  const [weeklySchedule, setWeeklySchedule] = useAtom(weeklyScheduleAtom);
   const isDarkMode = useAtomValue(isDarkModeAtom);
+  const [showManualModal, setShowManualModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
+  const loadInitialData = async () => {
+    try {
+      setError(false);
+      const [wateringStatus, tankLevel, schedule] = await Promise.all([
+        homeService.getWateringStatus(),
+        homeService.getTankLevel(),
+        homeService.getWeeklySchedule(),
+      ]);
+      setTankStatus({ ...wateringStatus, tankLevel });
+      setWeeklySchedule(schedule);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Carga inicial
+  useEffect(() => {
+    loadInitialData();
+  }, []);
+
+  // Polling cada 5 segundos: nivel tanque + estado riego
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const tankLevel = await homeService.getTankLevel();
-        setTankStatus((prev) => ({
-          ...prev,
-          tankLevel,
-        }));
-      } catch (error) {
-        console.error('Error actualizando nivel del tanque:', error);
+        const [wateringStatus, tankLevel] = await Promise.all([
+          homeService.getWateringStatus(),
+          homeService.getTankLevel(),
+        ]);
+        setTankStatus({ ...wateringStatus, tankLevel });
+        setError(false);
+      } catch {
+        // mantener datos actuales en segundo plano
       }
     }, 5000);
-
     return () => clearInterval(interval);
   }, [setTankStatus]);
-
-  const handleSettingsClick = () => {
-    console.log('Configuración clickeada');
-  };
 
   const handlePauseClick = async () => {
     try {
       const action = tankStatus.isWatering ? 'pause' : 'resume';
       await homeService.toggleWatering(action);
-      
-      setTankStatus((prev) => ({
-        ...prev,
-        isWatering: !prev.isWatering,
-      }));
+      setTankStatus((prev) => ({ ...prev, isWatering: !prev.isWatering }));
     } catch (error) {
       console.error('Error al pausar/reanudar:', error);
     }
   };
 
-  const handleManualClick = async () => {
-    console.log('Riego manual clickeado');
+  const handleStartManual = async (duration: number) => {
     try {
-      await homeService.startManualWatering(15);
-      setTankStatus((prev) => ({
-        ...prev,
-        isWatering: true,
-        timeRemaining: '15:00',
-      }));
-    } catch (error) {
-      console.error('Error iniciando riego manual:', error);
+      await homeService.startManualWatering(duration);
+      const mins = String(duration).padStart(2, '0');
+      setTankStatus((prev) => ({ ...prev, isWatering: true, timeRemaining: `${mins}:00` }));
+    } catch (e) {
+      console.error('Error iniciando riego manual:', e);
+      throw e;
     }
+  };
+
+  const handleSettingsClick = () => {
+    console.log('Configuración clickeada');
   };
 
   const handleHistoryClick = () => {
     console.log('Historial clickeado');
   };
+
+  if (loading) {
+    return (
+      <div className={`h-screen flex flex-col overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
+        <div className="h-full flex flex-col font-display bg-background-light dark:bg-background-dark overflow-hidden">
+          <div className="flex-shrink-0" style={{ height: '60px' }}>
+            <Header title="Finca Eloy" onSettingsClick={handleSettingsClick} />
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={`h-screen flex flex-col overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
+        <div className="h-full flex flex-col font-display bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 overflow-hidden">
+          <div className="flex-shrink-0" style={{ height: '60px' }}>
+            <Header title="Finca Eloy" onSettingsClick={handleSettingsClick} />
+          </div>
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 p-8 text-center">
+            <span className="material-symbols-outlined text-gray-400 dark:text-gray-500 text-5xl">cloud_off</span>
+            <p className="text-lg font-bold">Sin conexión</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              No se pudo conectar con la API.<br />Comprueba que el Pi está encendido.
+            </p>
+            <button
+              onClick={() => { resetApiUrl(); setLoading(true); loadInitialData(); }}
+              className="mt-1 px-6 py-2.5 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors"
+            >
+              Reintentar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -74,13 +137,14 @@ const Home: React.FC = () => {
           <Header title="Finca Eloy" onSettingsClick={handleSettingsClick} />
         </div>
 
-        <main 
+        <main
           className="flex-1 flex flex-col gap-3 px-3 py-2 overflow-hidden"
           style={{ minHeight: 0 }}
         >
           <div className="flex-shrink-0" style={{ height: '35%' }}>
             <MainStatusCard
               isWatering={tankStatus.isWatering}
+              sectorName={tankStatus.sectorName}
               timeRemaining={tankStatus.timeRemaining}
               onPauseClick={handlePauseClick}
             />
@@ -88,16 +152,28 @@ const Home: React.FC = () => {
 
           <div className="flex-shrink-0" style={{ height: '80px' }}>
             <ActionsBar
-              onManualClick={handleManualClick}
+              onManualClick={() => setShowManualModal(true)}
               onHistoryClick={handleHistoryClick}
             />
           </div>
 
           <div className="flex-shrink-0" style={{ height: '100px' }}>
             <TankLevelCard level={tankStatus.tankLevel} label="Nivel del Estanque" />
-          </div>       
+          </div>
+
+          {weeklySchedule.length > 0 && (
+            <div className="flex-shrink-0">
+              <WeeklySchedule schedule={weeklySchedule} />
+            </div>
+          )}
         </main>
       </div>
+
+      <ManualWateringModal
+        visible={showManualModal}
+        onClose={() => setShowManualModal(false)}
+        onStart={handleStartManual}
+      />
     </div>
   );
 };
