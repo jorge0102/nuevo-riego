@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, SafeAreaView, useColorScheme,
+  View, Text, StyleSheet, SafeAreaView, ScrollView, useColorScheme,
   ActivityIndicator, TouchableOpacity,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -124,27 +124,24 @@ export default function HomeScreen() {
         <View style={{ height: 60 }}>
           <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} />
         </View>
-        <View style={styles.main}>
-          <View style={styles.statusCard}>
-            <MainStatusCard
-              isWatering={tankStatus.isWatering}
-              sectorName={tankStatus.sectorName}
-              timeRemaining={tankStatus.timeRemaining}
-            />
-          </View>
-          <View style={{ height: 90 }}>
-            <ActionsBar
-              onManualClick={() => setShowManualModal(true)}
-              onHistoryClick={() => router.push('/history')}
-            />
-          </View>
-          <View style={{ height: 100 }}>
-            <TankLevelCard level={tankStatus.tankLevel} label="Nivel del Estanque" />
-          </View>
+        <ScrollView
+          contentContainerStyle={styles.main}
+          showsVerticalScrollIndicator={false}
+        >
+          <MainStatusCard
+            isWatering={tankStatus.isWatering}
+            sectorName={tankStatus.sectorName}
+            timeRemaining={tankStatus.timeRemaining}
+          />
+          <ActionsBar
+            onManualClick={() => setShowManualModal(true)}
+            onHistoryClick={() => router.push('/history')}
+          />
+          <TankLevelCard level={tankStatus.tankLevel} label="Nivel del Estanque" />
           {sectorSchedules.length > 0 && (
             <WeeklySchedule sectors={sectorSchedules} />
           )}
-        </View>
+        </ScrollView>
       </View>
 
       <ManualWateringModal
@@ -162,12 +159,11 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   container: { flex: 1 },
   main: {
-    flex: 1,
     paddingHorizontal: 12,
     paddingVertical: 8,
     gap: 12,
+    paddingBottom: 24,
   },
-  statusCard: { flex: 1, minHeight: 180 },
   errorContainer: {
     flex: 1,
     alignItems: 'center',
