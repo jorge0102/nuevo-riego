@@ -1,6 +1,5 @@
 import { atom } from 'jotai';
 import { apiFetch } from '../config/api';
-import { mockAPIData, mockWeeklySchedule, type MockWeekDay } from './home.mocks';
 
 export interface TankStatus {
   isWatering: boolean;
@@ -29,48 +28,32 @@ export const isDarkModeAtom = atom<boolean>(false);
 
 class HomeService {
   async getTankLevel(): Promise<number> {
-    try {
-      const res = await apiFetch('/tank/level');
-      const data = await res.json();
-      return data.level;
-    } catch {
-      return mockAPIData.tankLevel;
-    }
+    const res = await apiFetch('/tank/level');
+    const data = await res.json();
+    return data.level;
   }
 
   async getWateringStatus(): Promise<{ isWatering: boolean; sectorId: number | null; sectorName: string | null; timeRemaining: string }> {
-    try {
-      const res = await apiFetch('/watering/status');
-      const data = await res.json();
-      return { isWatering: data.isWatering, sectorId: data.sectorId ?? null, sectorName: data.sectorName ?? null, timeRemaining: data.timeRemaining };
-    } catch {
-      return { isWatering: false, sectorId: null, sectorName: null, timeRemaining: '00:00' };
-    }
+    const res = await apiFetch('/watering/status');
+    const data = await res.json();
+    return { isWatering: data.isWatering, sectorId: data.sectorId ?? null, sectorName: data.sectorName ?? null, timeRemaining: data.timeRemaining };
   }
 
   async toggleWatering(action: 'pause' | 'resume'): Promise<void> {
-    try {
-      await apiFetch('/watering/' + action, { method: 'POST' });
-    } catch { /* la UI usa actualización optimista */ }
+    await apiFetch('/watering/' + action, { method: 'POST' });
   }
 
   async startManualWatering(sectorId: number, duration: number): Promise<void> {
-    try {
-      await apiFetch('/watering/manual', {
-        method: 'POST',
-        body: JSON.stringify({ sectorId, duration }),
-      });
-    } catch { /* la UI usa actualización optimista */ }
+    await apiFetch('/watering/manual', {
+      method: 'POST',
+      body: JSON.stringify({ sectorId, duration }),
+    });
   }
 
-  async getWeeklySchedule(): Promise<MockWeekDay[]> {
-    try {
-      const res = await apiFetch('/schedule/weekly');
-      const data = await res.json();
-      return data.schedule;
-    } catch {
-      return mockWeeklySchedule;
-    }
+  async getWeeklySchedule(): Promise<WeekDay[]> {
+    const res = await apiFetch('/schedule/weekly');
+    const data = await res.json();
+    return data.schedule;
   }
 }
 

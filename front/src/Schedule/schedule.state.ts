@@ -1,7 +1,5 @@
-
 import { atom } from 'jotai';
 import { apiFetch } from '../config/api';
-import { mockSectors } from './schedule.mocks';
 
 export interface Sector {
   id: number;
@@ -16,31 +14,23 @@ export const sectorsAtom = atom<Sector[]>([]);
 
 class ScheduleService {
   async getSectors(): Promise<Sector[]> {
-    try {
-      const res = await apiFetch('/sectors');
-      const data = await res.json();
-      return data.sectors;
-    } catch {
-      return mockSectors;
-    }
+    const res = await apiFetch('/sectors');
+    const data = await res.json();
+    return data.sectors;
   }
 
   async toggleSector(sectorId: number, isActive: boolean): Promise<void> {
-    try {
-      await apiFetch(`/sectors/${sectorId}/toggle`, {
-        method: 'POST',
-        body: JSON.stringify({ isActive }),
-      });
-    } catch { /* la UI usa actualización optimista */ }
+    await apiFetch(`/sectors/${sectorId}/toggle`, {
+      method: 'POST',
+      body: JSON.stringify({ isActive }),
+    });
   }
 
   async toggleMode(sectorId: number, isAuto: boolean): Promise<void> {
-    try {
-      await apiFetch(`/sectors/${sectorId}/mode`, {
-        method: 'POST',
-        body: JSON.stringify({ isAuto }),
-      });
-    } catch { /* la UI usa actualización optimista */ }
+    await apiFetch(`/sectors/${sectorId}/mode`, {
+      method: 'POST',
+      body: JSON.stringify({ isAuto }),
+    });
   }
 }
 
