@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAtom } from 'jotai';
 import { tankStatusAtom, weeklyScheduleAtom, homeService } from './home.state';
+import { sectorsAtom, scheduleService } from '../Schedule/schedule.state';
 import { resetApiUrl } from '../config/api';
 import { getThemeColors, Colors } from '../theme/colors';
 import { Header } from './components/Header.component';
@@ -21,20 +22,26 @@ export default function HomeScreen() {
   const theme = getThemeColors(scheme);
   const [tankStatus, setTankStatus] = useAtom(tankStatusAtom);
   const [weeklySchedule, setWeeklySchedule] = useAtom(weeklyScheduleAtom);
+  const [allSectors, setAllSectors] = useAtom(sectorsAtom);
   const [showManualModal, setShowManualModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
+  const activeSectorCount = allSectors.filter((s) => s.isActive).length;
+  const sectorOptions = allSectors.map((s) => ({ id: s.id, name: s.name }));
+
   const loadInitialData = async () => {
     try {
       setError(false);
-      const [wateringStatus, tankLevel, schedule] = await Promise.all([
+      const [wateringStatus, tankLevel, schedule, sectors] = await Promise.all([
         homeService.getWateringStatus(),
         homeService.getTankLevel(),
         homeService.getWeeklySchedule(),
+        scheduleService.getSectors(),
       ]);
       setTankStatus({ ...wateringStatus, tankLevel });
       setWeeklySchedule(schedule);
+      setAllSectors(sectors);
     } catch {
       setError(true);
     } finally {
@@ -47,26 +54,28 @@ export default function HomeScreen() {
     loadInitialData();
   }, []);
 
-  // Polling cada 5 segundos: nivel tanque + estado riego
+  // Polling cada 5 segundos: nivel tanque + estado riego + sectores
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        const [wateringStatus, tankLevel] = await Promise.all([
+        const [wateringStatus, tankLevel, sectors] = await Promise.all([
           homeService.getWateringStatus(),
           homeService.getTankLevel(),
+          scheduleService.getSectors(),
         ]);
         setTankStatus({ ...wateringStatus, tankLevel });
+        setAllSectors(sectors);
         setError(false);
       } catch {
         // no sobreescribir error si ya está en error state
       }
     }, 5000);
     return () => clearInterval(interval);
-  }, [setTankStatus]);
+  }, [setTankStatus, setAllSectors]);
 
-  const handleStartManual = async (duration: number) => {
+  const handleStartManual = async (sectorId: number, duration: number) => {
     try {
-      await homeService.startManualWatering(duration);
+      await homeService.startManualWatering(sectorId, duration);
       const mins = String(duration).padStart(2, '0');
       setTankStatus((prev) => ({ ...prev, isWatering: true, timeRemaining: `${mins}:00` }));
     } catch (e) {
@@ -142,6 +151,8 @@ export default function HomeScreen() {
         visible={showManualModal}
         onClose={() => setShowManualModal(false)}
         onStart={handleStartManual}
+        sectors={sectorOptions}
+        activeSectorCount={activeSectorCount}
       />
     </SafeAreaView>
   );

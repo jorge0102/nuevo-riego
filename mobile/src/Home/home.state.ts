@@ -1,9 +1,9 @@
 import { atom } from 'jotai';
 import { apiFetch } from '../config/api';
-import type { MockWeekDay } from './home.mocks';
 
 export interface TankStatus {
   isWatering: boolean;
+  sectorId: number | null;
   sectorName: string | null;
   timeRemaining: string;
   tankLevel: number;
@@ -16,6 +16,7 @@ export interface WeekDay {
 
 export const tankStatusAtom = atom<TankStatus>({
   isWatering: false,
+  sectorId: null,
   sectorName: null,
   timeRemaining: '00:00',
   tankLevel: 0,
@@ -30,24 +31,24 @@ class HomeService {
     return data.level;
   }
 
-  async getWateringStatus(): Promise<{ isWatering: boolean; sectorName: string | null; timeRemaining: string }> {
+  async getWateringStatus(): Promise<{ isWatering: boolean; sectorId: number | null; sectorName: string | null; timeRemaining: string }> {
     const res = await apiFetch('/watering/status');
     const data = await res.json();
-    return { isWatering: data.isWatering, sectorName: data.sectorName ?? null, timeRemaining: data.timeRemaining };
+    return { isWatering: data.isWatering, sectorId: data.sectorId ?? null, sectorName: data.sectorName ?? null, timeRemaining: data.timeRemaining };
   }
 
   async toggleWatering(action: 'pause' | 'resume'): Promise<void> {
     await apiFetch('/watering/' + action, { method: 'POST' });
   }
 
-  async startManualWatering(duration: number): Promise<void> {
+  async startManualWatering(sectorId: number, duration: number): Promise<void> {
     await apiFetch('/watering/manual', {
       method: 'POST',
-      body: JSON.stringify({ duration }),
+      body: JSON.stringify({ sectorId, duration }),
     });
   }
 
-  async getWeeklySchedule(): Promise<MockWeekDay[]> {
+  async getWeeklySchedule(): Promise<WeekDay[]> {
     const res = await apiFetch('/schedule/weekly');
     const data = await res.json();
     return data.schedule;
