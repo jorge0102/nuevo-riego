@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useAtomValue } from 'jotai';
 import { Colors, getThemeColors } from '../../theme/colors';
+import { sectorNamesAtom, enabledSectorsAtom } from '../../Settings/settings.state';
 import type { SectorSchedule } from '../home.state';
 
 const DAY_LABELS = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
@@ -13,23 +15,26 @@ interface WeeklyScheduleProps {
 export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({ sectors }) => {
   const scheme = useColorScheme() ?? 'light';
   const theme = getThemeColors(scheme);
+  const sectorNames = useAtomValue(sectorNamesAtom);
+  const enabledSectors = useAtomValue(enabledSectorsAtom);
+  const visibleSectors = sectors.filter((s) => enabledSectors[s.id] ?? true);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.surface }]}>
       <Text style={[styles.title, { color: theme.text }]}>Programa Semanal</Text>
 
-      {sectors.map((sector, idx) => (
+      {visibleSectors.map((sector, idx) => (
         <View
           key={sector.id}
           style={[
             styles.row,
-            idx < sectors.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.inactive },
+            idx < visibleSectors.length - 1 && { borderBottomWidth: 1, borderBottomColor: theme.inactive },
           ]}
         >
           {/* Nombre + hora */}
           <View style={styles.sectorInfo}>
             <Text style={[styles.sectorName, { color: theme.text }]} numberOfLines={1}>
-              {sector.name}
+              {sectorNames[sector.id] ?? sector.name}
             </Text>
             <View style={styles.timeBadge}>
               <Ionicons name="time-outline" size={11} color={theme.textMuted} />

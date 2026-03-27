@@ -5,9 +5,10 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { tankStatusAtom, sectorSchedulesAtom, homeService } from './home.state';
 import { sectorsAtom, scheduleService } from '../Schedule/schedule.state';
+import { appNameAtom, sectorNamesAtom, enabledSectorsAtom } from '../Settings/settings.state';
 import { resetApiUrl } from '../config/api';
 import { getThemeColors, Colors } from '../theme/colors';
 import { Header } from './components/Header.component';
@@ -27,8 +28,12 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  const activeSectorCount = allSectors.filter((s) => s.isActive).length;
-  const sectorOptions = allSectors.map((s) => ({ id: s.id, name: s.name }));
+  const appName = useAtomValue(appNameAtom);
+  const sectorNames = useAtomValue(sectorNamesAtom);
+  const enabledSectors = useAtomValue(enabledSectorsAtom);
+  const visibleSectors = allSectors.filter((s) => enabledSectors[s.id] ?? true);
+  const activeSectorCount = visibleSectors.filter((s) => s.isActive).length;
+  const sectorOptions = visibleSectors.map((s) => ({ id: s.id, name: sectorNames[s.id] ?? s.name }));
 
   const loadInitialData = async () => {
     try {
@@ -88,7 +93,7 @@ export default function HomeScreen() {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
         <View style={[styles.header, { height: 60 }]}>
-          <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} />
+          <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} title={appName} />
         </View>
         <ActivityIndicator size="large" color={Colors.primary} style={{ flex: 1 }} />
       </SafeAreaView>
@@ -99,7 +104,7 @@ export default function HomeScreen() {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
         <View style={{ height: 60 }}>
-          <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} />
+          <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} title={appName} />
         </View>
         <View style={styles.errorContainer}>
           <Ionicons name="cloud-offline-outline" size={52} color={theme.textMuted} />
@@ -122,7 +127,7 @@ export default function HomeScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={{ height: 60 }}>
-          <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} />
+          <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} title={appName} />
         </View>
         <ScrollView
           contentContainerStyle={styles.main}

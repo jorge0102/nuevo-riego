@@ -8,7 +8,9 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useAtomValue } from 'jotai';
 import { Colors, getThemeColors } from '../../theme/colors';
+import { sectorNamesAtom } from '../../Settings/settings.state';
 import type { Sector } from '../schedule.state';
 
 interface SectorCardProps {
@@ -20,6 +22,8 @@ export const SectorCard: React.FC<SectorCardProps> = ({ sector, onToggle }) => {
   const scheme = useColorScheme() ?? 'light';
   const theme = getThemeColors(scheme);
   const isPrimary = sector.color === 'primary';
+  const sectorNames = useAtomValue(sectorNamesAtom);
+  const displayName = sectorNames[sector.id] ?? sector.name;
 
   return (
     <TouchableOpacity
@@ -48,7 +52,7 @@ export const SectorCard: React.FC<SectorCardProps> = ({ sector, onToggle }) => {
 
         {/* Nombre y badges */}
         <View style={styles.nameBlock}>
-          <Text style={[styles.sectorName, { color: theme.text }]}>{sector.name}</Text>
+          <Text style={[styles.sectorName, { color: theme.text }]}>{displayName}</Text>
           <View style={styles.badges}>
             <View
               style={[

@@ -6,8 +6,9 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { sectorsAtom, scheduleService } from './schedule.state';
+import { enabledSectorsAtom } from '../Settings/settings.state';
 import { getThemeColors, Colors } from '../theme/colors';
 import { SectorCard } from './components/SectorCard.component';
 
@@ -15,6 +16,8 @@ export default function ScheduleScreen() {
   const scheme = useColorScheme() ?? 'light';
   const theme = getThemeColors(scheme);
   const [sectors, setSectors] = useAtom(sectorsAtom);
+  const enabledSectors = useAtomValue(enabledSectorsAtom);
+  const visibleSectors = sectors.filter((s) => enabledSectors[s.id] ?? true);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -98,7 +101,7 @@ export default function ScheduleScreen() {
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
-          {sectors.map((sector) => (
+          {visibleSectors.map((sector) => (
             <SectorCard
               key={sector.id}
               sector={sector}
