@@ -1,7 +1,8 @@
 import React from 'react';
+import { useAppTheme } from '../theme/useAppTheme';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
-  StyleSheet, SafeAreaView, useColorScheme,
+  StyleSheet, SafeAreaView,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useAtom } from 'jotai';
@@ -18,7 +19,7 @@ const DEFAULT_SECTOR_NAMES: Record<number, string> = {
 const SECTOR_IDS = [1, 2, 3, 4];
 
 export default function SettingsScreen() {
-  const scheme = useColorScheme() ?? 'light';
+  const scheme = useAppTheme();
   const theme = getThemeColors(scheme);
   const [appName, setAppName] = useAtom(appNameAtom);
   const [sectorNames, setSectorNames] = useAtom(sectorNamesAtom);

@@ -1,10 +1,11 @@
 import React from 'react';
+import { useAppTheme } from '../../theme/useAppTheme';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  useColorScheme,
+  
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -19,7 +20,7 @@ interface SectorCardProps {
 }
 
 export const SectorCard: React.FC<SectorCardProps> = ({ sector, onToggle }) => {
-  const scheme = useColorScheme() ?? 'light';
+  const scheme = useAppTheme();
   const theme = getThemeColors(scheme);
   const isPrimary = sector.color === 'primary';
   const sectorNames = useAtomValue(sectorNamesAtom);

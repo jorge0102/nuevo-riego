@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { useAppTheme } from '../theme/useAppTheme';
 import {
-  View, Text, StyleSheet, SafeAreaView, ScrollView, useColorScheme,
+  View, Text, StyleSheet, SafeAreaView, ScrollView,
   ActivityIndicator, TouchableOpacity,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -19,7 +20,7 @@ import { ManualWateringModal } from './components/ManualWateringModal.component'
 import { WeeklySchedule } from './components/WeeklySchedule.component';
 
 export default function HomeScreen() {
-  const scheme = useColorScheme() ?? 'light';
+  const scheme = useAppTheme();
   const theme = getThemeColors(scheme);
   const [tankStatus, setTankStatus] = useAtom(tankStatusAtom);
   const [sectorSchedules, setSectorSchedules] = useAtom(sectorSchedulesAtom);

@@ -1,7 +1,8 @@
 import React, { useEffect, useCallback, useState } from 'react';
+import { useAppTheme } from '../theme/useAppTheme';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, SafeAreaView, useColorScheme, RefreshControl,
+  StyleSheet, SafeAreaView, RefreshControl,
   ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
@@ -13,7 +14,7 @@ import { getThemeColors, Colors } from '../theme/colors';
 import { SectorCard } from './components/SectorCard.component';
 
 export default function ScheduleScreen() {
-  const scheme = useColorScheme() ?? 'light';
+  const scheme = useAppTheme();
   const theme = getThemeColors(scheme);
   const [sectors, setSectors] = useAtom(sectorsAtom);
   const enabledSectors = useAtomValue(enabledSectorsAtom);

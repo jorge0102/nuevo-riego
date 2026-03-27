@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useAppTheme } from '../src/theme/useAppTheme';
 import {
   View,
   Text,
@@ -6,7 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
-  useColorScheme,
+  
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
@@ -40,7 +41,7 @@ function formatTime(iso: string): string {
 }
 
 export default function HistoryScreen() {
-  const scheme = useColorScheme() ?? 'light';
+  const scheme = useAppTheme();
   const theme = getThemeColors(scheme);
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);

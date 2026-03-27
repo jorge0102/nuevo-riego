@@ -1,10 +1,11 @@
 import React from 'react';
+import { useAppTheme } from '../../theme/useAppTheme';
 import {
   View,
   Text,
   StyleSheet,
   Image,
-  useColorScheme,
+  
 } from 'react-native';
 import { Colors, getThemeColors } from '../../theme/colors';
 
@@ -19,7 +20,7 @@ export const MainStatusCard: React.FC<MainStatusCardProps> = ({
   sectorName,
   timeRemaining,
 }) => {
-  const scheme = useColorScheme() ?? 'light';
+  const scheme = useAppTheme();
   const theme = getThemeColors(scheme);
 
   return (

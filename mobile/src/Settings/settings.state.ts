@@ -3,6 +3,9 @@ import { atomWithStorage, createJSONStorage } from 'jotai/utils';
 
 const storage = createJSONStorage(() => AsyncStorage);
 
+export type ThemeMode = 'light' | 'dark' | 'system';
+export const themeModeAtom = atomWithStorage<ThemeMode>('riego_themeMode', 'system', storage);
+
 export const appNameAtom = atomWithStorage<string>('riego_appName', 'Finca Eloy', storage);
 export const sectorNamesAtom = atomWithStorage<Record<number, string>>('riego_sectorNames', {}, storage);
 export const enabledSectorsAtom = atomWithStorage<Record<number, boolean>>(

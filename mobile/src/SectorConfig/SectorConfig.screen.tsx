@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useAppTheme } from '../theme/useAppTheme';
 import {
   View,
   Text,
@@ -7,7 +8,7 @@ import {
   StyleSheet,
   SafeAreaView,
   ActivityIndicator,
-  useColorScheme,
+  
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,7 +23,7 @@ import type { DayConfig } from './sector-config.mocks';
 
 export default function SectorConfigScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const scheme = useColorScheme() ?? 'light';
+  const scheme = useAppTheme();
   const theme = getThemeColors(scheme);
   const [config, setConfig] = useAtom(sectorConfigAtom);
   const [isSaving, setIsSaving] = useState(false);

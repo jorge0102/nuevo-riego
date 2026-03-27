@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, useColorScheme } from 'react-native';
+import { useAppTheme } from '../../theme/useAppTheme';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Colors, getThemeColors } from '../../theme/colors';
 import type { DayConfig } from '../sector-config.mocks';
 
@@ -9,7 +10,7 @@ interface DaysSelectorProps {
 }
 
 export const DaysSelector: React.FC<DaysSelectorProps> = ({ days, onChange }) => {
-  const scheme = useColorScheme() ?? 'light';
+  const scheme = useAppTheme();
   const theme = getThemeColors(scheme);
 
   const toggleDay = (index: number) => {

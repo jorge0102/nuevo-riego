@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, useColorScheme } from 'react-native';
+import { useAppTheme } from '../../theme/useAppTheme';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Colors, getThemeColors } from '../../theme/colors';
 
 interface TimeDurationProps {
@@ -15,7 +16,7 @@ export const TimeDuration: React.FC<TimeDurationProps> = ({
   onStartTimeChange,
   onDurationChange,
 }) => {
-  const scheme = useColorScheme() ?? 'light';
+  const scheme = useAppTheme();
   const theme = getThemeColors(scheme);
 
   const adjustTime = (delta: number) => {

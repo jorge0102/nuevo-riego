@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, useColorScheme } from 'react-native';
+import { useAppTheme } from '../../theme/useAppTheme';
+import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAtomValue } from 'jotai';
 import { Colors, getThemeColors } from '../../theme/colors';
@@ -13,7 +14,7 @@ interface WeeklyScheduleProps {
 }
 
 export const WeeklySchedule: React.FC<WeeklyScheduleProps> = ({ sectors }) => {
-  const scheme = useColorScheme() ?? 'light';
+  const scheme = useAppTheme();
   const theme = getThemeColors(scheme);
   const sectorNames = useAtomValue(sectorNamesAtom);
   const enabledSectors = useAtomValue(enabledSectorsAtom);

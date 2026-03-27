@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, useColorScheme } from 'react-native';
+import { useAppTheme } from '../../theme/useAppTheme';
+import { View, Text, StyleSheet } from 'react-native';
 import { Colors, getThemeColors } from '../../theme/colors';
 
 interface TankLevelCardProps {
@@ -23,7 +24,7 @@ export const TankLevelCard: React.FC<TankLevelCardProps> = ({
   level,
   label = 'Nivel del Estanque',
 }) => {
-  const scheme = useColorScheme() ?? 'light';
+  const scheme = useAppTheme();
   const theme = getThemeColors(scheme);
 
   return (

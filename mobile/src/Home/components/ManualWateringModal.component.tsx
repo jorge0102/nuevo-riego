@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAppTheme } from '../../theme/useAppTheme';
 import {
   Modal,
   View,
@@ -6,7 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  useColorScheme,
+  
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -35,7 +36,7 @@ export const ManualWateringModal: React.FC<ManualWateringModalProps> = ({
   sectors,
   activeSectorCount,
 }) => {
-  const scheme = useColorScheme() ?? 'light';
+  const scheme = useAppTheme();
   const theme = getThemeColors(scheme);
   const [selectedSectorId, setSelectedSectorId] = useState<number | null>(null);
   const [selectedDuration, setSelectedDuration] = useState(15);
