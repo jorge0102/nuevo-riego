@@ -9,9 +9,12 @@ export interface TankStatus {
   tankLevel: number;
 }
 
-export interface WeekDay {
-  day: string;
-  hasWatering: boolean;
+export interface SectorSchedule {
+  id: number;
+  name: string;
+  startTime: string;
+  duration: number;
+  days: { day: string; active: boolean }[];
 }
 
 export const tankStatusAtom = atom<TankStatus>({
@@ -22,7 +25,7 @@ export const tankStatusAtom = atom<TankStatus>({
   tankLevel: 0,
 });
 
-export const weeklyScheduleAtom = atom<WeekDay[]>([]);
+export const sectorSchedulesAtom = atom<SectorSchedule[]>([]);
 
 class HomeService {
   async getTankLevel(): Promise<number> {
@@ -48,10 +51,10 @@ class HomeService {
     });
   }
 
-  async getWeeklySchedule(): Promise<WeekDay[]> {
-    const res = await apiFetch('/schedule/weekly');
+  async getSectorSchedules(): Promise<SectorSchedule[]> {
+    const res = await apiFetch('/schedule/weekly-by-sector');
     const data = await res.json();
-    return data.schedule;
+    return data.sectors;
   }
 }
 

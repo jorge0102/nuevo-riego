@@ -39,6 +39,37 @@ async def get_weekly_schedule():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get('/schedule/weekly-by-sector')
+async def get_weekly_by_sector():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT s.id, s.name, sc.start_time, sc.duration
+            FROM sectors s
+            LEFT JOIN sector_config sc ON s.id = sc.id
+            ORDER BY s.id
+        ''')
+        sectors = cursor.fetchall()
+        result = []
+        for sector in sectors:
+            cursor.execute(
+                'SELECT day_code, active FROM sector_days WHERE sector_id = ? ORDER BY id',
+                (sector['id'],)
+            )
+            days = cursor.fetchall()
+            result.append({
+                'id': sector['id'],
+                'name': sector['name'],
+                'startTime': str(sector['start_time'])[:5] if sector['start_time'] else '06:00',
+                'duration': sector['duration'] or 30,
+                'days': [{'day': d['day_code'], 'active': bool(d['active'])} for d in days],
+            })
+        conn.close()
+        return {'sectors': result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.get('/sectors/{sector_id}/config')
 async def get_sector_config(sector_id: int):
     try:

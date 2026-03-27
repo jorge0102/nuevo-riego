@@ -6,7 +6,7 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAtom } from 'jotai';
-import { tankStatusAtom, weeklyScheduleAtom, homeService } from './home.state';
+import { tankStatusAtom, sectorSchedulesAtom, homeService } from './home.state';
 import { sectorsAtom, scheduleService } from '../Schedule/schedule.state';
 import { resetApiUrl } from '../config/api';
 import { getThemeColors, Colors } from '../theme/colors';
@@ -21,7 +21,7 @@ export default function HomeScreen() {
   const scheme = useColorScheme() ?? 'light';
   const theme = getThemeColors(scheme);
   const [tankStatus, setTankStatus] = useAtom(tankStatusAtom);
-  const [weeklySchedule, setWeeklySchedule] = useAtom(weeklyScheduleAtom);
+  const [sectorSchedules, setSectorSchedules] = useAtom(sectorSchedulesAtom);
   const [allSectors, setAllSectors] = useAtom(sectorsAtom);
   const [showManualModal, setShowManualModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -33,14 +33,14 @@ export default function HomeScreen() {
   const loadInitialData = async () => {
     try {
       setError(false);
-      const [wateringStatus, tankLevel, schedule, sectors] = await Promise.all([
+      const [wateringStatus, tankLevel, schedules, sectors] = await Promise.all([
         homeService.getWateringStatus(),
         homeService.getTankLevel(),
-        homeService.getWeeklySchedule(),
+        homeService.getSectorSchedules(),
         scheduleService.getSectors(),
       ]);
       setTankStatus({ ...wateringStatus, tankLevel });
-      setWeeklySchedule(schedule);
+      setSectorSchedules(schedules);
       setAllSectors(sectors);
     } catch {
       setError(true);
@@ -88,7 +88,7 @@ export default function HomeScreen() {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
         <View style={[styles.header, { height: 60 }]}>
-          <Header title="Finca Eloy" onSettingsClick={() => {}} />
+          <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} />
         </View>
         <ActivityIndicator size="large" color={Colors.primary} style={{ flex: 1 }} />
       </SafeAreaView>
@@ -99,7 +99,7 @@ export default function HomeScreen() {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
         <View style={{ height: 60 }}>
-          <Header title="Finca Eloy" onSettingsClick={() => {}} />
+          <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} />
         </View>
         <View style={styles.errorContainer}>
           <Ionicons name="cloud-offline-outline" size={52} color={theme.textMuted} />
@@ -122,7 +122,7 @@ export default function HomeScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={{ height: 60 }}>
-          <Header title="Finca Eloy" onSettingsClick={() => {}} />
+          <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} />
         </View>
         <View style={styles.main}>
           <View style={styles.statusCard}>
@@ -141,8 +141,8 @@ export default function HomeScreen() {
           <View style={{ height: 100 }}>
             <TankLevelCard level={tankStatus.tankLevel} label="Nivel del Estanque" />
           </View>
-          {weeklySchedule.length > 0 && (
-            <WeeklySchedule schedule={weeklySchedule} />
+          {sectorSchedules.length > 0 && (
+            <WeeklySchedule sectors={sectorSchedules} />
           )}
         </View>
       </View>
