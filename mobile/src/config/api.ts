@@ -1,7 +1,7 @@
 // Configuración central de la API
 // Prueba primero la red local (más rápido), luego Tailscale (fuera de casa)
 const LOCAL_URL   = 'http://192.168.1.103:3000/api';
-const TAILSCALE_URL = 'http://100.125.188.123:3000/api';
+const TAILSCALE_URL = 'http://100.94.75.89:3000/api';
 export const API_KEY = 'JRGXfNm5bmFF4fD_VhPW22nCl0r09bNuhIBvfXCjSJc';
 
 let cachedBaseUrl: string | null = null;
