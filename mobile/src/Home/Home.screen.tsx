@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAppTheme } from '../theme/useAppTheme';
 import {
-  View, Text, StyleSheet, SafeAreaView, ScrollView,
+  View, Text, StyleSheet, ScrollView,
   ActivityIndicator, TouchableOpacity,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAtom, useAtomValue } from 'jotai';
@@ -137,9 +138,7 @@ export default function HomeScreen() {
   if (loading) {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-        <View style={[styles.header, { height: 60 }]}>
-          <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} title={appName} />
-        </View>
+        <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} title={appName} />
         <ActivityIndicator size="large" color={Colors.primary} style={{ flex: 1 }} />
       </SafeAreaView>
     );
@@ -148,9 +147,7 @@ export default function HomeScreen() {
   if (error) {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
-        <View style={{ height: 60 }}>
-          <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} title={appName} />
-        </View>
+        <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} title={appName} />
         <View style={styles.errorContainer}>
           <Ionicons name="cloud-offline-outline" size={52} color={theme.textMuted} />
           <Text style={[styles.errorTitle, { color: theme.text }]}>Sin conexión</Text>
@@ -171,18 +168,18 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <View style={{ height: 60 }}>
-          <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} title={appName} />
-        </View>
+        <Header title="Finca Eloy" onSettingsClick={() => router.push('/settings')} title={appName} />
         <ScrollView
           contentContainerStyle={styles.main}
           showsVerticalScrollIndicator={false}
         >
-          <MainStatusCard
-            isWatering={tankStatus.isWatering}
-            sectorName={tankStatus.sectorName}
-            timeRemaining={displayTime}
-          />
+          <View style={{ minHeight: 180 }}>
+            <MainStatusCard
+              isWatering={tankStatus.isWatering}
+              sectorName={tankStatus.sectorName}
+              timeRemaining={displayTime}
+            />
+          </View>
           <ActionsBar
             onManualClick={() => setShowManualModal(true)}
             onHistoryClick={() => router.push('/history')}

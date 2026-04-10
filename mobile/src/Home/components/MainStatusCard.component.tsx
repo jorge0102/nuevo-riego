@@ -63,7 +63,7 @@ export const MainStatusCard: React.FC<MainStatusCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    flex: 1,
+    minHeight: 160,
     borderRadius: 12,
     padding: 10,
     shadowColor: '#000',
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   image: {
-    width: '48%',
+    flex: 1,
     borderRadius: 8,
   },
   info: {

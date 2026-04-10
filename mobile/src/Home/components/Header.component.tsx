@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, StatusBar as RNStatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAtom } from 'jotai';
 import { Colors, getThemeColors } from '../../theme/colors';
@@ -40,10 +40,11 @@ export const Header: React.FC<HeaderProps> = ({ title, onSettingsClick }) => {
 
 const styles = StyleSheet.create({
   container: {
-    height: 60,
+    height: Platform.OS === 'android' ? 60 + (RNStatusBar.currentHeight ?? 0) : 60,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
+    paddingTop: Platform.OS === 'android' ? (RNStatusBar.currentHeight ?? 0) : 0,
     justifyContent: 'space-between',
   },
   iconLeft: {

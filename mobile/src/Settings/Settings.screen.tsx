@@ -2,8 +2,9 @@ import React from 'react';
 import { useAppTheme } from '../theme/useAppTheme';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
-  StyleSheet, SafeAreaView,
+  StyleSheet,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useAtom } from 'jotai';
 import { appNameAtom, sectorNamesAtom, enabledSectorsAtom } from './settings.state';

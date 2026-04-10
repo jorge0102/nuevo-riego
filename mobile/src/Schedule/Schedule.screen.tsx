@@ -2,9 +2,10 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { useAppTheme } from '../theme/useAppTheme';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  StyleSheet, SafeAreaView, RefreshControl,
+  StyleSheet, RefreshControl,
   ActivityIndicator, Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAtom, useAtomValue } from 'jotai';
