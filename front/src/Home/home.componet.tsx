@@ -1,7 +1,7 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAtom, useAtomValue } from 'jotai';
-import { tankStatusAtom, weeklyScheduleAtom } from './home.module';
+import { tankStatusAtom, weeklyScheduleAtom, formatSeconds } from './home.module';
 import { ActionsBar } from './components/actions-bar.component';
 import { Header } from './components/header.componet';
 import { MainStatusCard } from './components/main-status-card.component';
@@ -40,6 +40,8 @@ const Home: React.FC = () => {
   const [showManualModal, setShowManualModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [localSeconds, setLocalSeconds] = useState(0);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const resolvedSectorName =
     tankStatus.sectorId != null && sectorNames[tankStatus.sectorId]
@@ -69,6 +71,25 @@ const Home: React.FC = () => {
   useEffect(() => {
     loadInitialData();
   }, []);
+
+  // Countdown local de 1 segundo sincronizado con API
+  useEffect(() => {
+    if (tankStatus.isWatering && tankStatus.remainingSeconds > 0) {
+      setLocalSeconds(tankStatus.remainingSeconds);
+    } else {
+      setLocalSeconds(0);
+    }
+  }, [tankStatus.remainingSeconds, tankStatus.isWatering]);
+
+  useEffect(() => {
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    if (tankStatus.isWatering && localSeconds > 0) {
+      countdownRef.current = setInterval(() => {
+        setLocalSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    }
+    return () => { if (countdownRef.current) clearInterval(countdownRef.current); };
+  }, [tankStatus.isWatering, tankStatus.remainingSeconds]);
 
   // Polling cada 5 segundos: nivel tanque + estado riego + sectores activos
   useEffect(() => {
@@ -102,8 +123,13 @@ const Home: React.FC = () => {
   const handleStartManual = async (sectorId: number, duration: number) => {
     try {
       await homeService.startManualWatering(sectorId, duration);
-      const mins = String(duration).padStart(2, '0');
-      setTankStatus((prev) => ({ ...prev, isWatering: true, timeRemaining: `${mins}:00` }));
+      const totalSeconds = duration * 60;
+      setTankStatus((prev) => ({
+        ...prev,
+        isWatering: true,
+        remainingSeconds: totalSeconds,
+        timeRemaining: formatSeconds(totalSeconds),
+      }));
     } catch (e) {
       console.error('Error iniciando riego manual:', e);
       throw e;
@@ -172,7 +198,7 @@ const Home: React.FC = () => {
             <MainStatusCard
               isWatering={tankStatus.isWatering}
               sectorName={resolvedSectorName}
-              timeRemaining={tankStatus.timeRemaining}
+              timeRemaining={formatSeconds(localSeconds)}
               onPauseClick={handlePauseClick}
             />
           </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAppTheme } from '../theme/useAppTheme';
 import {
   View, Text, StyleSheet, SafeAreaView, ScrollView,
@@ -7,7 +7,7 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAtom, useAtomValue } from 'jotai';
-import { tankStatusAtom, sectorSchedulesAtom, homeService } from './home.state';
+import { tankStatusAtom, sectorSchedulesAtom, homeService, formatSeconds } from './home.state';
 import { sectorsAtom, scheduleService } from '../Schedule/schedule.state';
 import { appNameAtom, sectorNamesAtom, enabledSectorsAtom } from '../Settings/settings.state';
 import { resetApiUrl } from '../config/api';
@@ -28,6 +28,8 @@ export default function HomeScreen() {
   const [showManualModal, setShowManualModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [localSeconds, setLocalSeconds] = useState(0);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const appName = useAtomValue(appNameAtom);
   const sectorNames = useAtomValue(sectorNamesAtom);
@@ -60,6 +62,26 @@ export default function HomeScreen() {
     loadInitialData();
   }, []);
 
+  // Sincronizar segundos desde API
+  useEffect(() => {
+    if (tankStatus.isWatering && tankStatus.remainingSeconds > 0) {
+      setLocalSeconds(tankStatus.remainingSeconds);
+    } else {
+      setLocalSeconds(0);
+    }
+  }, [tankStatus.remainingSeconds, tankStatus.isWatering]);
+
+  // Countdown local de 1 segundo
+  useEffect(() => {
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    if (tankStatus.isWatering && localSeconds > 0) {
+      countdownRef.current = setInterval(() => {
+        setLocalSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    }
+    return () => { if (countdownRef.current) clearInterval(countdownRef.current); };
+  }, [tankStatus.isWatering, tankStatus.remainingSeconds]);
+
   // Polling cada 5 segundos: nivel tanque + estado riego + sectores
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -82,8 +104,13 @@ export default function HomeScreen() {
   const handleStartManual = async (sectorId: number, duration: number) => {
     try {
       await homeService.startManualWatering(sectorId, duration);
-      const mins = String(duration).padStart(2, '0');
-      setTankStatus((prev) => ({ ...prev, isWatering: true, timeRemaining: `${mins}:00` }));
+      const totalSeconds = duration * 60;
+      setTankStatus((prev) => ({
+        ...prev,
+        isWatering: true,
+        remainingSeconds: totalSeconds,
+        timeRemaining: formatSeconds(totalSeconds),
+      }));
     } catch (e) {
       console.error('Error iniciando riego manual:', e);
       throw e;
@@ -137,7 +164,7 @@ export default function HomeScreen() {
           <MainStatusCard
             isWatering={tankStatus.isWatering}
             sectorName={tankStatus.sectorName}
-            timeRemaining={tankStatus.timeRemaining}
+            timeRemaining={formatSeconds(localSeconds)}
           />
           <ActionsBar
             onManualClick={() => setShowManualModal(true)}

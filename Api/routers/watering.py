@@ -24,18 +24,24 @@ async def get_watering_status():
 
         timer = get_sector_timer(active['id'])
         if timer.get('scheduled') and timer.get('remaining_seconds') is not None:
-            remaining = int(timer['remaining_seconds'])
-            mins = remaining // 60
+            remaining = max(0, int(timer['remaining_seconds']))
+            hours = remaining // 3600
+            mins = (remaining % 3600) // 60
             secs = remaining % 60
-            time_str = f'{mins:02d}:{secs:02d}'
+            if hours > 0:
+                time_str = f'{hours:02d}:{mins:02d}:{secs:02d}'
+            else:
+                time_str = f'{mins:02d}:{secs:02d}'
         else:
             time_str = '00:00'
+            remaining = 0
 
         return {
             'isWatering': True,
             'sectorId': active['id'],
             'sectorName': active['name'],
             'timeRemaining': time_str,
+            'remainingSeconds': remaining,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
