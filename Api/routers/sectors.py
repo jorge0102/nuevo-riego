@@ -51,11 +51,26 @@ async def toggle_sector(sector_id: int, data: SectorToggle):
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('UPDATE sectors SET is_active = ? WHERE id = ?', (int(data.isActive), sector_id))
-        conn.commit()
-        if cursor.rowcount == 0:
+
+        # Verificar que el sector existe
+        cursor.execute('SELECT id FROM sectors WHERE id = ?', (sector_id,))
+        if not cursor.fetchone():
             conn.close()
             raise HTTPException(status_code=404, detail='Sector no encontrado')
+
+        if data.isActive:
+            # Parar cualquier otro sector activo antes de activar este (1 electroválvula a la vez)
+            cursor.execute('SELECT id FROM sectors WHERE is_active = 1 AND id != ?', (sector_id,))
+            active_others = cursor.fetchall()
+            if active_others:
+                cursor.execute('UPDATE sectors SET is_active = 0 WHERE is_active = 1 AND id != ?', (sector_id,))
+                conn.commit()
+                for s in active_others:
+                    set_relay(s['id'], False)
+                    cancel_sector_timer(s['id'])
+
+        cursor.execute('UPDATE sectors SET is_active = ? WHERE id = ?', (int(data.isActive), sector_id))
+        conn.commit()
         conn.close()
 
         set_relay(sector_id, data.isActive)

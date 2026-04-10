@@ -3,7 +3,7 @@ import { useAppTheme } from '../theme/useAppTheme';
 import {
   View, Text, ScrollView, TouchableOpacity,
   StyleSheet, SafeAreaView, RefreshControl,
-  ActivityIndicator,
+  ActivityIndicator, Alert,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -60,14 +60,41 @@ export default function ScheduleScreen() {
     setRefreshing(false);
   };
 
-  const handleToggleSector = async (id: number, isActive: boolean) => {
+  const doToggle = async (id: number, isActive: boolean) => {
     try {
       await scheduleService.toggleSector(id, isActive);
-      setSectors((prev) => prev.map((s) => (s.id === id ? { ...s, isActive } : s)));
+      setSectors((prev) => prev.map((s) => {
+        if (s.id === id) return { ...s, isActive };
+        if (isActive && s.isActive) return { ...s, isActive: false };
+        return s;
+      }));
       setTimeout(loadSectors, 500);
     } catch (e) {
       console.error('Error al cambiar estado del sector:', e);
     }
+  };
+
+  const handleToggleSector = (id: number, isActive: boolean) => {
+    if (isActive) {
+      const activeSector = sectors.find((s) => s.isActive && s.id !== id);
+      const newSector = sectors.find((s) => s.id === id);
+      if (activeSector) {
+        Alert.alert(
+          '⚠️ Electroválvula activa',
+          `"${activeSector.name}" está abierta.\n\n¿Quieres pararla y activar "${newSector?.name ?? 'el nuevo sector'}"?`,
+          [
+            { text: 'Cancelar', style: 'cancel' },
+            {
+              text: 'Sí, cambiar',
+              style: 'destructive',
+              onPress: () => doToggle(id, true),
+            },
+          ]
+        );
+        return;
+      }
+    }
+    doToggle(id, isActive);
   };
 
   return (
