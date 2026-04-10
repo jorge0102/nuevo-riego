@@ -28,7 +28,8 @@ export default function HomeScreen() {
   const [showManualModal, setShowManualModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [localSeconds, setLocalSeconds] = useState(0);
+  const [displayTime, setDisplayTime] = useState('00:00');
+  const secondsRef = useRef(0);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const appName = useAtomValue(appNameAtom);
@@ -62,23 +63,22 @@ export default function HomeScreen() {
     loadInitialData();
   }, []);
 
-  // Sincronizar segundos desde API
-  useEffect(() => {
-    if (tankStatus.isWatering && tankStatus.remainingSeconds > 0) {
-      setLocalSeconds(tankStatus.remainingSeconds);
-    } else {
-      setLocalSeconds(0);
-    }
-  }, [tankStatus.remainingSeconds, tankStatus.isWatering]);
-
-  // Countdown local de 1 segundo
+  // Countdown: sincroniza con API y tick cada segundo con ref para evitar race conditions
   useEffect(() => {
     if (countdownRef.current) clearInterval(countdownRef.current);
-    if (tankStatus.isWatering && localSeconds > 0) {
+
+    if (tankStatus.isWatering && tankStatus.remainingSeconds > 0) {
+      secondsRef.current = tankStatus.remainingSeconds;
+      setDisplayTime(formatSeconds(secondsRef.current));
       countdownRef.current = setInterval(() => {
-        setLocalSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+        secondsRef.current = Math.max(0, secondsRef.current - 1);
+        setDisplayTime(formatSeconds(secondsRef.current));
       }, 1000);
+    } else {
+      secondsRef.current = 0;
+      setDisplayTime('00:00');
     }
+
     return () => { if (countdownRef.current) clearInterval(countdownRef.current); };
   }, [tankStatus.isWatering, tankStatus.remainingSeconds]);
 
@@ -105,6 +105,14 @@ export default function HomeScreen() {
     try {
       await homeService.startManualWatering(sectorId, duration);
       const totalSeconds = duration * 60;
+      // Arrancar countdown inmediatamente sin esperar al polling
+      if (countdownRef.current) clearInterval(countdownRef.current);
+      secondsRef.current = totalSeconds;
+      setDisplayTime(formatSeconds(totalSeconds));
+      countdownRef.current = setInterval(() => {
+        secondsRef.current = Math.max(0, secondsRef.current - 1);
+        setDisplayTime(formatSeconds(secondsRef.current));
+      }, 1000);
       setTankStatus((prev) => ({
         ...prev,
         isWatering: true,
@@ -164,7 +172,7 @@ export default function HomeScreen() {
           <MainStatusCard
             isWatering={tankStatus.isWatering}
             sectorName={tankStatus.sectorName}
-            timeRemaining={formatSeconds(localSeconds)}
+            timeRemaining={displayTime}
           />
           <ActionsBar
             onManualClick={() => setShowManualModal(true)}
