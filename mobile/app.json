@@ -1,17 +1,17 @@
 {
   "expo": {
-    "name": "Riego",
-    "slug": "riego",
+    "name": "Finca Eloi",
+    "slug": "finca-eloi",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "scheme": "riego",
+    "scheme": "finca-eloi",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#f0f4f8"
+      "backgroundColor": "#1a6b4a"
     },
     "ios": {
       "supportsTablet": false
@@ -19,10 +19,11 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#f0f4f8"
+        "backgroundColor": "#1a6b4a"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.fincaeloi"
     },
     "web": {
       "bundler": "metro",
