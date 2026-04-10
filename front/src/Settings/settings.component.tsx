@@ -9,7 +9,13 @@ const DEFAULT_SECTOR_NAMES: Record<number, string> = {
   2: 'Sector 2: Mangos',
   3: 'Sector 3: Pencas',
   4: 'Sector 4: Pitayas',
+  5: 'Sector 5',
+  6: 'Sector 6',
+  7: 'Sector 7',
+  8: 'Sector 8',
 };
+
+const SECTOR_IDS = [1, 2, 3, 4, 5, 6, 7, 8];
 
 const Settings: React.FC = () => {
   const navigate = useNavigate();
@@ -63,7 +69,7 @@ const Settings: React.FC = () => {
             <h2 className="text-base font-semibold">Sectores</h2>
           </div>
           <div className="flex flex-col gap-4">
-            {[1, 2, 3, 4].map((id) => {
+            {SECTOR_IDS.map((id) => {
               const isEnabled = enabledSectors[id] ?? true;
               return (
                 <div key={id} className={`flex flex-col gap-2 rounded-lg p-3 border transition-colors ${isEnabled ? 'border-primary/30 bg-primary/5' : 'border-gray-200 dark:border-gray-700'}`}>
@@ -108,7 +114,7 @@ const Settings: React.FC = () => {
           onClick={() => {
             setAppName('Finca Eloy');
             setSectorNames({});
-            setEnabledSectors({ 1: true, 2: true, 3: true, 4: true });
+            setEnabledSectors({ 1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true, 8: true });
           }}
           className="w-full rounded-xl border-2 border-gray-200 dark:border-gray-700 py-3 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:bg-surface-light dark:hover:bg-surface-dark transition-colors"
         >

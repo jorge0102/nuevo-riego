@@ -14,9 +14,13 @@ const DEFAULT_SECTOR_NAMES: Record<number, string> = {
   2: 'Sector 2: Mangos',
   3: 'Sector 3: Pencas',
   4: 'Sector 4: Pitayas',
+  5: 'Sector 5',
+  6: 'Sector 6',
+  7: 'Sector 7',
+  8: 'Sector 8',
 };
 
-const SECTOR_IDS = [1, 2, 3, 4];
+const SECTOR_IDS = [1, 2, 3, 4, 5, 6, 7, 8];
 
 export default function SettingsScreen() {
   const scheme = useAppTheme();
@@ -39,7 +43,7 @@ export default function SettingsScreen() {
   const handleReset = () => {
     setAppName('Finca Eloy');
     setSectorNames({});
-    setEnabledSectors({ 1: true, 2: true, 3: true, 4: true });
+    setEnabledSectors({ 1: true, 2: true, 3: true, 4: true, 5: true, 6: true, 7: true, 8: true });
   };
 
   return (
