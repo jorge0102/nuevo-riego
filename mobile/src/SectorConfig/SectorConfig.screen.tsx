@@ -12,8 +12,9 @@ import {
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { sectorConfigAtom, sectorConfigService, type SectorConfiguration } from './sector-config.state';
+import { sectorNamesAtom } from '../Settings/settings.state';
 import { getThemeColors, Colors } from '../theme/colors';
 import { ModeToggle } from './components/ModeToggle.component';
 import { DaysSelector } from './components/DaysSelector.component';
@@ -26,6 +27,7 @@ export default function SectorConfigScreen() {
   const scheme = useAppTheme();
   const theme = getThemeColors(scheme);
   const [config, setConfig] = useAtom(sectorConfigAtom);
+  const sectorNames = useAtomValue(sectorNamesAtom);
   const [isSaving, setIsSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -108,9 +110,9 @@ export default function SectorConfigScreen() {
           <Text style={[styles.backIcon, { color: Colors.primary }]}>←</Text>
         </TouchableOpacity>
         <View style={styles.headerTitle}>
-          <Text style={styles.headerIcon}>{config.icon}</Text>
+          <Ionicons name="leaf-outline" size={20} color={Colors.primary} />
           <Text style={[styles.title, { color: theme.text }]} numberOfLines={1}>
-            {config.name}
+            {sectorNames[config.id] ?? config.name}
           </Text>
         </View>
         <View style={styles.headerRight} />
@@ -178,9 +180,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  headerIcon: {
-    fontSize: 22,
   },
   title: {
     fontSize: 18,
