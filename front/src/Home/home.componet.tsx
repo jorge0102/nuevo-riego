@@ -73,24 +73,38 @@ const Home: React.FC = () => {
     loadInitialData();
   }, []);
 
-  // Countdown: sincroniza con API y tick cada segundo con ref para evitar race conditions
+  // Efecto 1: sincronizar segundos desde la API (solo si devuelve valor positivo)
   useEffect(() => {
-    if (countdownRef.current) clearInterval(countdownRef.current);
-
     if (tankStatus.isWatering && tankStatus.remainingSeconds > 0) {
       secondsRef.current = tankStatus.remainingSeconds;
       setDisplayTime(formatSeconds(secondsRef.current));
-      countdownRef.current = setInterval(() => {
-        secondsRef.current = Math.max(0, secondsRef.current - 1);
-        setDisplayTime(formatSeconds(secondsRef.current));
-      }, 1000);
+    }
+  }, [tankStatus.isWatering, tankStatus.remainingSeconds]);
+
+  // Efecto 2: arrancar/parar el intervalo solo cuando cambia isWatering
+  useEffect(() => {
+    if (tankStatus.isWatering) {
+      if (!countdownRef.current) {
+        countdownRef.current = setInterval(() => {
+          secondsRef.current = Math.max(0, secondsRef.current - 1);
+          setDisplayTime(formatSeconds(secondsRef.current));
+        }, 1000);
+      }
     } else {
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
       secondsRef.current = 0;
       setDisplayTime('00:00');
     }
-
-    return () => { if (countdownRef.current) clearInterval(countdownRef.current); };
-  }, [tankStatus.isWatering, tankStatus.remainingSeconds]);
+    return () => {
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
+    };
+  }, [tankStatus.isWatering]);
 
   // Polling cada 5 segundos: nivel tanque + estado riego + sectores activos
   useEffect(() => {
@@ -125,14 +139,9 @@ const Home: React.FC = () => {
     try {
       await homeService.startManualWatering(sectorId, duration);
       const totalSeconds = duration * 60;
-      // Arrancar countdown inmediatamente sin esperar al polling
-      if (countdownRef.current) clearInterval(countdownRef.current);
+      // Actualizar ref y display inmediatamente (el intervalo lo arranca el useEffect)
       secondsRef.current = totalSeconds;
       setDisplayTime(formatSeconds(totalSeconds));
-      countdownRef.current = setInterval(() => {
-        secondsRef.current = Math.max(0, secondsRef.current - 1);
-        setDisplayTime(formatSeconds(secondsRef.current));
-      }, 1000);
       setTankStatus((prev) => ({
         ...prev,
         isWatering: true,
