@@ -1,12 +1,14 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from config.database import get_db_connection
-from scheduler import get_sector_timer
+from gpio_manager import set_relay
+from scheduler import get_sector_timer, schedule_sector_stop, cancel_sector_timer
 
 router = APIRouter(prefix='/api/watering', tags=['Watering'])
 
 class ManualWateringRequest(BaseModel):
-    duration: int
+    sectorId: int
+    duration: int  # minutos
 
 @router.get('/status')
 async def get_watering_status():
@@ -43,9 +45,15 @@ async def pause_watering():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('UPDATE watering_status SET is_watering = 0 WHERE id = 1')
+        # Desactivar todos los sectores activos
+        cursor.execute('SELECT id FROM sectors WHERE is_active = 1')
+        active_sectors = cursor.fetchall()
+        cursor.execute('UPDATE sectors SET is_active = 0')
         conn.commit()
         conn.close()
+        for s in active_sectors:
+            set_relay(s['id'], False)
+            cancel_sector_timer(s['id'])
         return {'success': True, 'message': 'Riego pausado'}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -53,26 +61,41 @@ async def pause_watering():
 @router.post('/resume')
 async def resume_watering():
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute('UPDATE watering_status SET is_watering = 1 WHERE id = 1')
-        conn.commit()
-        conn.close()
-        return {'success': True, 'message': 'Riego reanudado'}
+        return {'success': True, 'message': 'Usa riego manual para reanudar'}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post('/manual')
 async def start_manual_watering(data: ManualWateringRequest):
     try:
-        hours = data.duration // 60
-        minutes = data.duration % 60
-        time_str = f'{hours:02d}:{minutes:02d}'
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('UPDATE watering_status SET is_watering = 1, time_remaining = ? WHERE id = 1', (time_str,))
+
+        # Verificar que el sector existe
+        cursor.execute('SELECT id, name FROM sectors WHERE id = ?', (data.sectorId,))
+        sector = cursor.fetchone()
+        if not sector:
+            conn.close()
+            raise HTTPException(status_code=404, detail='Sector no encontrado')
+
+        # Activar el sector en la BD
+        cursor.execute('UPDATE sectors SET is_active = 1 WHERE id = ?', (data.sectorId,))
         conn.commit()
         conn.close()
-        return {'success': True, 'message': f'Riego manual iniciado por {data.duration} minutos'}
+
+        # Activar el relé GPIO
+        set_relay(data.sectorId, True)
+
+        # Programar parada automática con la duración indicada
+        schedule_sector_stop(data.sectorId, data.duration, sector['name'])
+        timer_info = get_sector_timer(data.sectorId)
+
+        return {
+            'success': True,
+            'message': 'Riego manual iniciado: ' + sector['name'] + ' por ' + str(data.duration) + ' min',
+            'timer': timer_info
+        }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

@@ -7,14 +7,17 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  
+  TextInput,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, getThemeColors } from '../../theme/colors';
 
 const MAX_ACTIVE = 2;
-const DURATION_OPTIONS = [5, 10, 15, 30, 45, 60];
+const DURATION_OPTIONS = [2, 5, 10, 15, 30, 45, 60];
+const CUSTOM_VALUE = -1;
 
 export interface SectorOption {
   id: number;
@@ -40,16 +43,28 @@ export const ManualWateringModal: React.FC<ManualWateringModalProps> = ({
   const theme = getThemeColors(scheme);
   const [selectedSectorId, setSelectedSectorId] = useState<number | null>(null);
   const [selectedDuration, setSelectedDuration] = useState(15);
+  const [isCustom, setIsCustom] = useState(false);
+  const [customMinutes, setCustomMinutes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const wouldExceedLimit = activeSectorCount >= MAX_ACTIVE;
-  const canStart = selectedSectorId !== null && !wouldExceedLimit;
+  const effectiveDuration = isCustom ? parseInt(customMinutes || '0', 10) : selectedDuration;
+  const canStart = selectedSectorId !== null && !wouldExceedLimit && effectiveDuration > 0;
+
+  const handleDurationSelect = (min: number) => {
+    if (min === CUSTOM_VALUE) {
+      setIsCustom(true);
+    } else {
+      setIsCustom(false);
+      setSelectedDuration(min);
+    }
+  };
 
   const handleStart = async () => {
     if (!canStart || selectedSectorId === null) return;
     setIsLoading(true);
     try {
-      await onStart(selectedSectorId, selectedDuration);
+      await onStart(selectedSectorId, effectiveDuration);
       onClose();
     } finally {
       setIsLoading(false);
@@ -63,6 +78,10 @@ export const ManualWateringModal: React.FC<ManualWateringModalProps> = ({
       animationType="slide"
       onRequestClose={onClose}
     >
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
       <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onClose} />
       <View style={[styles.sheet, { backgroundColor: theme.surface }]}>
         {/* Handle */}
@@ -138,11 +157,11 @@ export const ManualWateringModal: React.FC<ManualWateringModalProps> = ({
           <Text style={[styles.sectionLabel, { color: theme.textMuted, marginTop: 16 }]}>Duración</Text>
           <View style={styles.durationGrid}>
             {DURATION_OPTIONS.map((min) => {
-              const isSelected = selectedDuration === min;
+              const isSelected = !isCustom && selectedDuration === min;
               return (
                 <TouchableOpacity
                   key={min}
-                  onPress={() => setSelectedDuration(min)}
+                  onPress={() => handleDurationSelect(min)}
                   style={[
                     styles.durationChip,
                     { backgroundColor: isSelected ? Colors.primary : theme.inactive },
@@ -155,7 +174,38 @@ export const ManualWateringModal: React.FC<ManualWateringModalProps> = ({
                 </TouchableOpacity>
               );
             })}
+            {/* Opción personalizada */}
+            <TouchableOpacity
+              onPress={() => handleDurationSelect(CUSTOM_VALUE)}
+              style={[
+                styles.durationChip,
+                { backgroundColor: isCustom ? Colors.primary : theme.inactive },
+              ]}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="pencil-outline" size={14} color={isCustom ? Colors.white : Colors.primary} />
+              <Text style={[styles.durationText, { color: isCustom ? Colors.white : theme.text, marginLeft: 4 }]}>
+                Otros
+              </Text>
+            </TouchableOpacity>
           </View>
+
+          {/* Input duración personalizada */}
+          {isCustom && (
+            <View style={[styles.customInputRow, { backgroundColor: theme.inactive }]}>
+              <TextInput
+                style={[styles.customInput, { color: theme.text }]}
+                placeholder="Ej: 7"
+                placeholderTextColor={theme.textMuted}
+                keyboardType="number-pad"
+                value={customMinutes}
+                onChangeText={(v) => setCustomMinutes(v.replace(/[^0-9]/g, ''))}
+                autoFocus
+                maxLength={4}
+              />
+              <Text style={[styles.customInputLabel, { color: theme.textMuted }]}>minutos</Text>
+            </View>
+          )}
         </ScrollView>
 
         {/* Botón */}
@@ -171,12 +221,17 @@ export const ManualWateringModal: React.FC<ManualWateringModalProps> = ({
             <>
               <Ionicons name="play" size={18} color={Colors.white} />
               <Text style={styles.startButtonText}>
-                {selectedSectorId === null ? 'Selecciona un sector' : `Iniciar ${selectedDuration} min`}
+                {selectedSectorId === null
+                  ? 'Selecciona un sector'
+                  : isCustom && !customMinutes
+                  ? 'Introduce los minutos'
+                  : `Iniciar ${effectiveDuration} min`}
               </Text>
             </>
           )}
         </TouchableOpacity>
       </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
@@ -257,8 +312,29 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     minWidth: 80,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   durationText: { fontSize: 14, fontWeight: '600' },
+  customInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    marginTop: 10,
+    gap: 8,
+  },
+  customInput: {
+    fontSize: 22,
+    fontWeight: '700',
+    minWidth: 60,
+    paddingVertical: 8,
+  },
+  customInputLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
   startButton: {
     height: 52,
     borderRadius: 12,
