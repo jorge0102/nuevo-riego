@@ -78,7 +78,17 @@ async def start_manual_watering(data: ManualWateringRequest):
             conn.close()
             raise HTTPException(status_code=404, detail='Sector no encontrado')
 
-        # Activar el sector en la BD
+        # Parar cualquier sector activo antes de arrancar el nuevo (1 electroválvula a la vez)
+        cursor.execute('SELECT id FROM sectors WHERE is_active = 1 AND id != ?', (data.sectorId,))
+        active_others = cursor.fetchall()
+        if active_others:
+            cursor.execute('UPDATE sectors SET is_active = 0 WHERE is_active = 1 AND id != ?', (data.sectorId,))
+            conn.commit()
+            for s in active_others:
+                set_relay(s['id'], False)
+                cancel_sector_timer(s['id'])
+
+        # Activar el sector nuevo en la BD
         cursor.execute('UPDATE sectors SET is_active = 1 WHERE id = ?', (data.sectorId,))
         conn.commit()
         conn.close()
