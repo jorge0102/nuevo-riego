@@ -55,6 +55,7 @@ const Settings: React.FC = () => {
           </div>
           <input
             type="text"
+            inputMode="text"
             value={appName}
             onChange={(e) => setAppName(e.target.value)}
             placeholder="Nombre de la finca"
@@ -97,6 +98,7 @@ const Settings: React.FC = () => {
                   </div>
                   <input
                     type="text"
+                    inputMode="text"
                     value={getSectorName(id)}
                     onChange={(e) => handleSectorName(id, e.target.value)}
                     placeholder={DEFAULT_SECTOR_NAMES[id]}

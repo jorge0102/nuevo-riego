@@ -1,6 +1,6 @@
 // Configuración central de la API
 // Prueba primero la red local (más rápido), luego IP pública (fuera de casa)
-const LOCAL_URL   = 'http://192.168.1.104:3000/api';
+const LOCAL_URL   = 'http://192.168.1.105:3000/api';
 const REMOTE_URL  = 'http://2.139.178.59:3000/api';
 export const API_KEY = 'JRGXfNm5bmFF4fD_VhPW22nCl0r09bNuhIBvfXCjSJc';
 

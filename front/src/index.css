@@ -20,23 +20,20 @@
 }
 
 html {
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
+  height: 100%;
+  overflow-y: auto;
 }
 
 body {
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
+  height: 100%;
+  overflow-y: auto;
   margin: 0;
   padding: 0;
 }
 
 #root {
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .material-symbols-outlined {

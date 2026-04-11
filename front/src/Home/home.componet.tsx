@@ -199,43 +199,29 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div
-      className="h-screen flex flex-col overflow-hidden"
-      style={{ height: '100vh', maxHeight: '100vh' }}
-    >
-      <div className="h-full flex flex-col font-display bg-background-light dark:bg-background-dark text-[#101922] dark:text-gray-200 overflow-hidden">
+    <div className="min-h-screen flex flex-col">
+      <div className="flex flex-col font-display bg-background-light dark:bg-background-dark text-[#101922] dark:text-gray-200 min-h-screen">
         <div className="flex-shrink-0" style={{ height: '60px' }}>
           <Header title={appName} />
         </div>
 
-        <main
-          className="flex-1 flex flex-col gap-3 px-3 py-2 overflow-hidden"
-          style={{ minHeight: 0 }}
-        >
-          <div className="flex-shrink-0" style={{ height: '35%' }}>
-            <MainStatusCard
-              isWatering={tankStatus.isWatering}
-              sectorName={resolvedSectorName}
-              timeRemaining={displayTime}
-              onPauseClick={handlePauseClick}
-            />
-          </div>
+        <main className="flex flex-col gap-3 px-3 py-2 pb-6">
+          <MainStatusCard
+            isWatering={tankStatus.isWatering}
+            sectorName={resolvedSectorName}
+            timeRemaining={displayTime}
+            onPauseClick={handlePauseClick}
+          />
 
-          <div className="flex-shrink-0" style={{ height: '80px' }}>
-            <ActionsBar
-              onManualClick={() => setShowManualModal(true)}
-              onHistoryClick={handleHistoryClick}
-            />
-          </div>
+          <ActionsBar
+            onManualClick={() => setShowManualModal(true)}
+            onHistoryClick={handleHistoryClick}
+          />
 
-          <div className="flex-shrink-0" style={{ height: '100px' }}>
-            <TankLevelCard level={tankStatus.tankLevel} label="Nivel del Estanque" />
-          </div>
+          <TankLevelCard level={tankStatus.tankLevel} label="Nivel del Estanque" />
 
           {weeklySchedule.length > 0 && (
-            <div className="flex-shrink-0">
-              <WeeklySchedule schedule={weeklySchedule} />
-            </div>
+            <WeeklySchedule schedule={weeklySchedule} />
           )}
         </main>
       </div>
