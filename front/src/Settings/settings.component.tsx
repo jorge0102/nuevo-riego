@@ -3,6 +3,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { appNameAtom, sectorNamesAtom, enabledSectorsAtom } from './settings.state';
+import { VirtualKeyboard } from '../components/VirtualKeyboard';
+import { useVirtualKeyboard } from '../components/useVirtualKeyboard';
 
 const DEFAULT_SECTOR_NAMES: Record<number, string> = {
   1: 'Sector 1: Aguacates',
@@ -22,6 +24,8 @@ const Settings: React.FC = () => {
   const [appName, setAppName] = useAtom(appNameAtom);
   const [sectorNames, setSectorNames] = useAtom(sectorNamesAtom);
   const [enabledSectors, setEnabledSectors] = useAtom(enabledSectorsAtom);
+
+  const { keyboardVisible, keyboardValue, openKeyboard, closeKeyboard, handleChange } = useVirtualKeyboard();
 
   const getSectorName = (id: number) =>
     sectorNames[id] ?? DEFAULT_SECTOR_NAMES[id] ?? `Sector ${id}`;
@@ -58,8 +62,10 @@ const Settings: React.FC = () => {
             inputMode="text"
             value={appName}
             onChange={(e) => setAppName(e.target.value)}
+            onFocus={() => openKeyboard(appName, setAppName)}
             placeholder="Nombre de la finca"
-            className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-background-light dark:bg-background-dark px-4 py-3 text-sm font-medium outline-none focus:border-primary transition-colors"
+            readOnly
+            className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-background-light dark:bg-background-dark px-4 py-3 text-sm font-medium outline-none focus:border-primary transition-colors cursor-pointer"
           />
         </section>
 
@@ -101,9 +107,11 @@ const Settings: React.FC = () => {
                     inputMode="text"
                     value={getSectorName(id)}
                     onChange={(e) => handleSectorName(id, e.target.value)}
+                    onFocus={() => openKeyboard(getSectorName(id), (val) => handleSectorName(id, val))}
                     placeholder={DEFAULT_SECTOR_NAMES[id]}
                     disabled={!isEnabled}
-                    className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-background-light dark:bg-background-dark px-4 py-2.5 text-sm font-medium outline-none focus:border-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    readOnly
+                    className="w-full rounded-lg border border-gray-200 dark:border-gray-700 bg-background-light dark:bg-background-dark px-4 py-2.5 text-sm font-medium outline-none focus:border-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                   />
                 </div>
               );
@@ -123,6 +131,13 @@ const Settings: React.FC = () => {
           Restablecer valores por defecto
         </button>
       </div>
+      {keyboardVisible && (
+        <VirtualKeyboard
+          inputValue={keyboardValue}
+          onChange={handleChange}
+          onClose={closeKeyboard}
+        />
+      )}
     </div>
   );
 };
