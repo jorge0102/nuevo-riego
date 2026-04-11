@@ -69,7 +69,7 @@ export const ManualWateringModal: React.FC<ManualWateringModalProps> = ({
     >
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      <div className="relative bg-white dark:bg-gray-800 rounded-t-2xl px-5 pb-9 pt-3 flex flex-col gap-4">
+      <div className="relative bg-white dark:bg-gray-800 rounded-t-2xl px-5 pb-9 pt-3 flex flex-col gap-4 overflow-y-auto max-h-[90vh]">
         {/* Handle */}
         <div className="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600 mx-auto mb-1" />
 
