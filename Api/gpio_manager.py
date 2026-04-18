@@ -7,10 +7,16 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 RELAY_PINS = {
-    1: int(os.getenv('RELAY_GPIO_1', '26')),
-    2: int(os.getenv('RELAY_GPIO_2', '20')),
-    3: int(os.getenv('RELAY_GPIO_3', '21')),
-    4: int(os.getenv('RELAY_GPIO_4', '19')),
+    1: int(os.getenv('RELAY_GPIO_1', '17')),
+    2: int(os.getenv('RELAY_GPIO_2', '27')),
+    3: int(os.getenv('RELAY_GPIO_3', '22')),
+    4: int(os.getenv('RELAY_GPIO_4', '23')),
+    5: int(os.getenv('RELAY_GPIO_5', '24')),
+    6: int(os.getenv('RELAY_GPIO_6', '25')),
+    7: int(os.getenv('RELAY_GPIO_7', '5')),
+    8: int(os.getenv('RELAY_GPIO_8', '6')),
+    9: int(os.getenv('RELAY_GPIO_9', '12')),
+    10: int(os.getenv('RELAY_GPIO_10', '16')),
 }
 RELAY_ACTIVE_LOW = os.getenv('RELAY_ACTIVE_LOW', 'true').lower() == 'true'
 
