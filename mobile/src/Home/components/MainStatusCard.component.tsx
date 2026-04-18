@@ -5,23 +5,26 @@ import {
   Text,
   StyleSheet,
   Image,
-  
 } from 'react-native';
 import { Colors, getThemeColors } from '../../theme/colors';
+import { ActiveSector } from '../home.state';
 
 interface MainStatusCardProps {
   isWatering: boolean;
   sectorName: string | null;
   timeRemaining: string;
+  activeSectors: ActiveSector[];
 }
 
 export const MainStatusCard: React.FC<MainStatusCardProps> = ({
   isWatering,
   sectorName,
   timeRemaining,
+  activeSectors,
 }) => {
   const scheme = useAppTheme();
   const theme = getThemeColors(scheme);
+  const multiActive = activeSectors.length > 1;
 
   return (
     <View style={[styles.card, { backgroundColor: theme.surface }]}>
@@ -36,20 +39,39 @@ export const MainStatusCard: React.FC<MainStatusCardProps> = ({
         <View style={styles.info}>
           <View style={[styles.badge, { backgroundColor: isWatering ? `${Colors.primary}22` : theme.inactive }]}>
             <Text style={[styles.badgeText, { color: isWatering ? Colors.primary : theme.textMuted }]}>
-              {isWatering ? 'Regando' : 'Inactivo'}
+              {isWatering
+                ? multiActive
+                  ? `Regando (${activeSectors.length})`
+                  : 'Regando'
+                : 'Inactivo'}
             </Text>
           </View>
 
           {isWatering ? (
-            <>
-              <Text style={[styles.sectorName, { color: theme.text }]} numberOfLines={1}>
-                {sectorName ?? 'Sector'}
-              </Text>
-              <View style={styles.timeBlock}>
-                <Text style={[styles.timeLabel, { color: theme.textMuted }]}>Tiempo restante</Text>
-                <Text style={[styles.timeValue, { color: Colors.primary }]}>{timeRemaining}</Text>
+            multiActive ? (
+              <View style={styles.multiSectorList}>
+                {activeSectors.map((s) => (
+                  <View key={s.id} style={styles.multiSectorRow}>
+                    <Text style={[styles.multiSectorName, { color: theme.text }]} numberOfLines={1}>
+                      {s.name}
+                    </Text>
+                    <Text style={[styles.multiSectorTime, { color: Colors.primary }]}>
+                      {s.timeRemaining}
+                    </Text>
+                  </View>
+                ))}
               </View>
-            </>
+            ) : (
+              <>
+                <Text style={[styles.sectorName, { color: theme.text }]} numberOfLines={1}>
+                  {sectorName ?? 'Sector'}
+                </Text>
+                <View style={styles.timeBlock}>
+                  <Text style={[styles.timeLabel, { color: theme.textMuted }]}>Tiempo restante</Text>
+                  <Text style={[styles.timeValue, { color: Colors.primary }]}>{timeRemaining}</Text>
+                </View>
+              </>
+            )
           ) : (
             <Text style={[styles.idleText, { color: theme.textMuted }]}>
               Sin riego activo
@@ -116,5 +138,24 @@ const styles = StyleSheet.create({
   idleText: {
     fontSize: 13,
     lineHeight: 18,
+  },
+  multiSectorList: {
+    gap: 6,
+  },
+  multiSectorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 4,
+  },
+  multiSectorName: {
+    fontSize: 12,
+    fontWeight: '600',
+    flex: 1,
+  },
+  multiSectorTime: {
+    fontSize: 12,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
   },
 });

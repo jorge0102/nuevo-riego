@@ -60,7 +60,8 @@ def get_sector_timer(sector_id: int):
             'scheduled': True,
             'runsAt': job.next_run_time.strftime('%H:%M:%S'),
             'remainingMinutes': mins,
-            'remainingSeconds': secs
+            'remainingSeconds': secs,
+            'totalRemainingSeconds': total_secs
         }
     return {'scheduled': False}
 

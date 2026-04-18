@@ -1,6 +1,13 @@
 import { atom } from 'jotai';
 import { apiFetch } from '../config/api';
 
+export interface ActiveSector {
+  id: number;
+  name: string;
+  timeRemaining: string;
+  remainingSeconds: number;
+}
+
 export interface TankStatus {
   isWatering: boolean;
   sectorId: number | null;
@@ -8,6 +15,8 @@ export interface TankStatus {
   timeRemaining: string;
   remainingSeconds: number;
   tankLevel: number;
+  activeSectors: ActiveSector[];
+  activeCount: number;
 }
 
 export function formatSeconds(seconds: number): string {
@@ -33,6 +42,8 @@ export const tankStatusAtom = atom<TankStatus>({
   timeRemaining: '00:00',
   remainingSeconds: 0,
   tankLevel: 0,
+  activeSectors: [],
+  activeCount: 0,
 });
 
 export const weeklyScheduleAtom = atom<WeekDay[]>([]);
@@ -46,7 +57,7 @@ class HomeService {
     return data.level;
   }
 
-  async getWateringStatus(): Promise<{ isWatering: boolean; sectorId: number | null; sectorName: string | null; timeRemaining: string; remainingSeconds: number }> {
+  async getWateringStatus(): Promise<Omit<TankStatus, 'tankLevel'>> {
     const res = await apiFetch('/watering/status');
     const data = await res.json();
     return {
@@ -55,6 +66,8 @@ class HomeService {
       sectorName: data.sectorName ?? null,
       timeRemaining: data.timeRemaining ?? '00:00',
       remainingSeconds: data.remainingSeconds ?? 0,
+      activeSectors: data.activeSectors ?? [],
+      activeCount: data.activeCount ?? 0,
     };
   }
 

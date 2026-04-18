@@ -15,7 +15,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, getThemeColors } from '../../theme/colors';
 
-const MAX_ACTIVE = 1;
+const MAX_ACTIVE = 2;
 const DURATION_OPTIONS = [2, 5, 10, 15, 30, 45, 60];
 const CUSTOM_VALUE = -1;
 
@@ -111,7 +111,7 @@ export const ManualWateringModal: React.FC<ManualWateringModalProps> = ({
               <View style={{ flex: 1 }}>
                 <Text style={styles.warningTitle}>Límite de seguridad alcanzado</Text>
                 <Text style={styles.warningText}>
-                  Solo puede haber 1 electroválvula abierta a la vez. Para el sector activo antes de arrancar otro.
+                  Solo pueden estar abiertas 2 electroválvulas a la vez. Para un sector activo antes de arrancar otro.
                 </Text>
               </View>
             </View>

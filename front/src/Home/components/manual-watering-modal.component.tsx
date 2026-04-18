@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 
-const MAX_ACTIVE = 1;
+const MAX_ACTIVE = 2;
 const MIN_DURATION = 1;
 const MAX_DURATION = 120;
 const QUICK_PRESETS = [2, 5, 10, 15, 30, 45, 60];
@@ -94,7 +94,7 @@ export const ManualWateringModal: React.FC<ManualWateringModalProps> = ({
             <div>
               <p className="text-sm font-bold text-red-700 dark:text-red-400">Límite de seguridad alcanzado</p>
               <p className="text-xs text-red-600 dark:text-red-500 mt-0.5">
-                Solo puede haber 1 electroválvula abierta a la vez. Para el sector activo antes de arrancar otro.
+                Solo pueden estar abiertas 2 electroválvulas a la vez. Para un sector activo antes de arrancar otro.
               </p>
             </div>
           </div>

@@ -4,6 +4,8 @@ from config.database import get_db_connection
 from gpio_manager import set_relay
 from scheduler import get_sector_timer, schedule_sector_stop, cancel_sector_timer
 
+MAX_ACTIVE_VALVES = 2
+
 router = APIRouter(prefix='/api/watering', tags=['Watering'])
 
 class ManualWateringRequest(BaseModel):
@@ -15,16 +17,28 @@ async def get_watering_status():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('SELECT id, name FROM sectors WHERE is_active = 1 LIMIT 1')
-        active = cursor.fetchone()
+        cursor.execute('SELECT id, name FROM sectors WHERE is_active = 1 ORDER BY id')
+        active_rows = cursor.fetchall()
         conn.close()
 
-        if not active:
-            return {'isWatering': False, 'sectorId': None, 'sectorName': None, 'timeRemaining': '00:00'}
+        if not active_rows:
+            return {
+                'isWatering': False,
+                'sectorId': None,
+                'sectorName': None,
+                'timeRemaining': '00:00',
+                'remainingSeconds': 0,
+                'activeSectors': [],
+                'activeCount': 0,
+            }
 
-        timer = get_sector_timer(active['id'])
-        if timer.get('scheduled') and timer.get('remaining_seconds') is not None:
-            remaining = max(0, int(timer['remaining_seconds']))
+        active_sectors = []
+        for row in active_rows:
+            timer = get_sector_timer(row['id'])
+            if timer.get('scheduled') and timer.get('totalRemainingSeconds') is not None:
+                remaining = max(0, int(timer['totalRemainingSeconds']))
+            else:
+                remaining = 0
             hours = remaining // 3600
             mins = (remaining % 3600) // 60
             secs = remaining % 60
@@ -32,16 +46,22 @@ async def get_watering_status():
                 time_str = f'{hours:02d}:{mins:02d}:{secs:02d}'
             else:
                 time_str = f'{mins:02d}:{secs:02d}'
-        else:
-            time_str = '00:00'
-            remaining = 0
+            active_sectors.append({
+                'id': row['id'],
+                'name': row['name'],
+                'timeRemaining': time_str,
+                'remainingSeconds': remaining,
+            })
 
+        first = active_sectors[0]
         return {
             'isWatering': True,
-            'sectorId': active['id'],
-            'sectorName': active['name'],
-            'timeRemaining': time_str,
-            'remainingSeconds': remaining,
+            'sectorId': first['id'],
+            'sectorName': first['name'],
+            'timeRemaining': first['timeRemaining'],
+            'remainingSeconds': first['remainingSeconds'],
+            'activeSectors': active_sectors,
+            'activeCount': len(active_sectors),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -51,7 +71,6 @@ async def pause_watering():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        # Desactivar todos los sectores activos
         cursor.execute('SELECT id FROM sectors WHERE is_active = 1')
         active_sectors = cursor.fetchall()
         cursor.execute('UPDATE sectors SET is_active = 0')
@@ -77,32 +96,29 @@ async def start_manual_watering(data: ManualWateringRequest):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Verificar que el sector existe
         cursor.execute('SELECT id, name FROM sectors WHERE id = ?', (data.sectorId,))
         sector = cursor.fetchone()
         if not sector:
             conn.close()
             raise HTTPException(status_code=404, detail='Sector no encontrado')
 
-        # Parar cualquier sector activo antes de arrancar el nuevo (1 electroválvula a la vez)
-        cursor.execute('SELECT id FROM sectors WHERE is_active = 1 AND id != ?', (data.sectorId,))
-        active_others = cursor.fetchall()
-        if active_others:
-            cursor.execute('UPDATE sectors SET is_active = 0 WHERE is_active = 1 AND id != ?', (data.sectorId,))
-            conn.commit()
-            for s in active_others:
-                set_relay(s['id'], False)
-                cancel_sector_timer(s['id'])
+        # Contar cuántos otros sectores están activos (sin contar este)
+        cursor.execute('SELECT COUNT(*) as cnt FROM sectors WHERE is_active = 1 AND id != ?', (data.sectorId,))
+        row = cursor.fetchone()
+        others_active = row['cnt'] if row else 0
 
-        # Activar el sector nuevo en la BD
+        if others_active >= MAX_ACTIVE_VALVES:
+            conn.close()
+            raise HTTPException(
+                status_code=409,
+                detail=f'Límite de {MAX_ACTIVE_VALVES} electroválvulas simultáneas alcanzado. Para una antes de arrancar otra.'
+            )
+
         cursor.execute('UPDATE sectors SET is_active = 1 WHERE id = ?', (data.sectorId,))
         conn.commit()
         conn.close()
 
-        # Activar el relé GPIO
         set_relay(data.sectorId, True)
-
-        # Programar parada automática con la duración indicada
         schedule_sector_stop(data.sectorId, data.duration, sector['name'])
         timer_info = get_sector_timer(data.sectorId)
 

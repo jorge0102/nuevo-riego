@@ -210,6 +210,7 @@ const Home: React.FC = () => {
             isWatering={tankStatus.isWatering}
             sectorName={resolvedSectorName}
             timeRemaining={displayTime}
+            activeSectors={tankStatus.activeSectors ?? []}
             onPauseClick={handlePauseClick}
           />
 

@@ -178,6 +178,7 @@ export default function HomeScreen() {
               isWatering={tankStatus.isWatering}
               sectorName={tankStatus.sectorName}
               timeRemaining={displayTime}
+              activeSectors={tankStatus.activeSectors ?? []}
             />
           </View>
           <ActionsBar

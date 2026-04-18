@@ -4,6 +4,8 @@ from config.database import get_db_connection
 from gpio_manager import set_relay
 from scheduler import schedule_sector_stop, cancel_sector_timer, get_sector_timer
 
+MAX_ACTIVE_VALVES = 2
+
 router = APIRouter(prefix='/api/sectors', tags=['Sectors'])
 
 class SectorToggle(BaseModel):
@@ -52,22 +54,22 @@ async def toggle_sector(sector_id: int, data: SectorToggle):
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Verificar que el sector existe
         cursor.execute('SELECT id FROM sectors WHERE id = ?', (sector_id,))
         if not cursor.fetchone():
             conn.close()
             raise HTTPException(status_code=404, detail='Sector no encontrado')
 
         if data.isActive:
-            # Parar cualquier otro sector activo antes de activar este (1 electroválvula a la vez)
-            cursor.execute('SELECT id FROM sectors WHERE is_active = 1 AND id != ?', (sector_id,))
-            active_others = cursor.fetchall()
-            if active_others:
-                cursor.execute('UPDATE sectors SET is_active = 0 WHERE is_active = 1 AND id != ?', (sector_id,))
-                conn.commit()
-                for s in active_others:
-                    set_relay(s['id'], False)
-                    cancel_sector_timer(s['id'])
+            # Verificar límite de electroválvulas simultáneas
+            cursor.execute('SELECT COUNT(*) as cnt FROM sectors WHERE is_active = 1 AND id != ?', (sector_id,))
+            row = cursor.fetchone()
+            others_active = row['cnt'] if row else 0
+            if others_active >= MAX_ACTIVE_VALVES:
+                conn.close()
+                raise HTTPException(
+                    status_code=409,
+                    detail=f'Límite de {MAX_ACTIVE_VALVES} electroválvulas simultáneas alcanzado. Para una antes de arrancar otra.'
+                )
 
         cursor.execute('UPDATE sectors SET is_active = ? WHERE id = ?', (int(data.isActive), sector_id))
         conn.commit()
