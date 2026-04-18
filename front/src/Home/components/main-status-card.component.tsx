@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActiveSector } from '../home.state';
+import type { ActiveSector } from '../home.state';
 
 interface MainStatusCardProps {
   isWatering: boolean;

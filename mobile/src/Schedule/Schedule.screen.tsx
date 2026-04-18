@@ -64,33 +64,26 @@ export default function ScheduleScreen() {
   const doToggle = async (id: number, isActive: boolean) => {
     try {
       await scheduleService.toggleSector(id, isActive);
-      setSectors((prev) => prev.map((s) => {
-        if (s.id === id) return { ...s, isActive };
-        if (isActive && s.isActive) return { ...s, isActive: false };
-        return s;
-      }));
+      setSectors((prev) => prev.map((s) => s.id === id ? { ...s, isActive } : s));
       setTimeout(loadSectors, 500);
-    } catch (e) {
-      console.error('Error al cambiar estado del sector:', e);
+    } catch (e: any) {
+      const status = e?.status ?? e?.response?.status;
+      if (status === 409) {
+        Alert.alert('⚠️ Límite alcanzado', 'Ya hay 2 electroválvulas abiertas. Para una antes de arrancar otra.');
+      } else {
+        console.error('Error al cambiar estado del sector:', e);
+      }
     }
   };
 
   const handleToggleSector = (id: number, isActive: boolean) => {
     if (isActive) {
-      const activeSector = sectors.find((s) => s.isActive && s.id !== id);
-      const newSector = sectors.find((s) => s.id === id);
-      if (activeSector) {
+      const activeOthers = sectors.filter((s) => s.isActive && s.id !== id);
+      if (activeOthers.length >= 2) {
         Alert.alert(
-          '⚠️ Electroválvula activa',
-          `"${activeSector.name}" está abierta.\n\n¿Quieres pararla y activar "${newSector?.name ?? 'el nuevo sector'}"?`,
-          [
-            { text: 'Cancelar', style: 'cancel' },
-            {
-              text: 'Sí, cambiar',
-              style: 'destructive',
-              onPress: () => doToggle(id, true),
-            },
-          ]
+          '⚠️ Límite alcanzado',
+          'Ya hay 2 electroválvulas abiertas a la vez. Para una antes de arrancar otra.',
+          [{ text: 'Entendido', style: 'cancel' }]
         );
         return;
       }

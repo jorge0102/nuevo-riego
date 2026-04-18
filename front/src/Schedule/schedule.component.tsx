@@ -49,11 +49,7 @@ const Schedule: React.FC = () => {
   const doToggle = async (id: number, isActive: boolean) => {
     try {
       await scheduleService.toggleSector(id, isActive);
-      setSectors((prev) => prev.map((s) => {
-        if (s.id === id) return { ...s, isActive };
-        if (isActive && s.isActive) return { ...s, isActive: false }; // refleja parada de otros
-        return s;
-      }));
+      setSectors((prev) => prev.map((s) => s.id === id ? { ...s, isActive } : s));
       setTimeout(loadSectors, 500);
     } catch (error) {
       console.error('Error al cambiar estado del sector:', error);
@@ -62,19 +58,13 @@ const Schedule: React.FC = () => {
 
   const handleToggleSector = (id: number, isActive: boolean) => {
     if (isActive) {
-      const activeSector = sectors.find((s) => s.isActive && s.id !== id);
-      if (activeSector) {
-        setConflict({ activeSector, newId: id });
+      const activeOthers = sectors.filter((s) => s.isActive && s.id !== id);
+      if (activeOthers.length >= 2) {
+        setConflict({ activeSector: activeOthers[0], newId: id });
         return;
       }
     }
     doToggle(id, isActive);
-  };
-
-  const handleConflictConfirm = async () => {
-    if (!conflict) return;
-    setConflict(null);
-    await doToggle(conflict.newId, true);
   };
 
   const handleModeChange = async (id: number, isAuto: boolean) => {
@@ -146,17 +136,11 @@ const Schedule: React.FC = () => {
               </div>
               <div>
                 <p className="font-bold text-gray-900 dark:text-gray-100">Electroválvula activa</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Solo puede haber 1 abierta a la vez</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Máximo 2 electroválvulas a la vez</p>
               </div>
             </div>
             <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-              <span className="font-semibold text-orange-500">
-                {sectors.find(s => s.id === conflict.activeSector.id)?.name ?? conflict.activeSector.name}
-              </span>{' '}
-              está activo. ¿Quieres pararlo y activar{' '}
-              <span className="font-semibold text-primary">
-                {sectors.find(s => s.id === conflict.newId)?.name ?? 'el nuevo sector'}
-              </span>?
+              Ya hay 2 electroválvulas abiertas a la vez. Para una antes de arrancar otra.
             </p>
             <div className="flex gap-3">
               <button
@@ -166,10 +150,10 @@ const Schedule: React.FC = () => {
                 Cancelar
               </button>
               <button
-                onClick={handleConflictConfirm}
+                onClick={() => setConflict(null)}
                 className="flex-1 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors"
               >
-                Sí, cambiar
+                Entendido
               </button>
             </div>
           </div>
